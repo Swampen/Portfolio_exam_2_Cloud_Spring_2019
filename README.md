@@ -85,46 +85,28 @@ The whole work is divided into different tasks listed below, which include <span
 
 ### **Hand-in**:
 
-• A PDF report PExam2-Report.pdf.
-• SSH private key file (named as datsXX-key.pem) that is used to access VMs. Use the same key
-for all the purposes such as VM access, rsync etc.
-• Place all the submission files in a directory structure like:
-PExam2-GroupXX
+- A PDF report PExam2-Report.pdf.
 
-- datsXX-key.pem
-- PExam2-Report.pdf
-- scripts
-  • Compress/zip the project directory into a single file named PExam2-GroupXX.zip (use ZIP
-  compression, not any other such as RAR…), and submit this file in PExam2 (Group) inside
-  Assignments in Canvas. 
-  • Important notes:
-  o While evaluating, correctness, completeness, clearness, and preciseness of the answers,
-  and writing and structure of the report in general will be looked into. Completeness of the
-  report means it should include all the assignment text/questions, diagrams, screenshots, etc.
-  (even if explicitly not asked) such that a reader or an evaluator of the report need not look
-  into the other documents or submitted supporting files for understanding of your answers.
-  Other submitted supporting files and live setups will be used for validation check of the
-  answers.
-  o For screenshots of configuration files which are long, you should provide only those parts that
-  are changed or added yourself. Also, avoid redundant screenshots. For example, if it is the
-  same in different servers, give one and say that it is the same in other servers.
-  o Everything written in the report should be your own and any form of copying is not
-  acceptable.
-  o Email submission will not be accepted. Therefore, submit on time to avoid any last-minute
-  technical problem.
-  o Avoid multiple submissions. If done so, there is no guarantee that the most recent one will be
-  used for the evaluation.
-  o Not following explicitly stated instructions will lead to deduction of points.
-  o If in case you couldn't make something working in your implementation, explain what and
-  how you tried to troubleshoot and give a discussion on what do you think could be potential
-  problem(s).
-  o Keep only those VMs in ALTO that are required for the tasks (If other VMs are created for
-  some other purpose, delete/terminate them). Presence of any unnecessary VM would be
-  considered as a wrong VM.
-  o One should not make any changes in ALTO cloud after your submission. Otherwise, it’s
-  timestamp will be used as your submission date/time and this could lead to deduction of
-  your score (second deadline) or rejection of your submission (after second deadline).
-  o There are two deadlines. If the first deadline is missed, 5% of the total score obtained will be
-  deducted. No submission will be accepted after the second deadline.
-  o If there is anything not clear or confused or wondering about, do ask the course teacher ON
-  TIME
+- SSH private key file (named as datsXX-key.pem) that is used to access VMs. Use **the same key for all the purposes** such as VM access, rsync etc.
+
+- Place all the submission files in a directory structure like:
+
+  PExam2-GroupXX
+
+  - datsXX-key.pem
+  - PExam2-Report.pdf
+  - scripta
+
+- Compress/zip the project directory into a single file named PExam2-GroupXX.zip (use ZIP compression, not any other such as RAR…), and submit this file in PExam2 (Group) inside **Assignments** in **Canvas**. 
+- Important notes:
+  - **While evaluating, correctness, completeness, clearness, and preciseness of the answers, and writing and structure of the report in general will be looked into**. Completeness of the report means it should include all the assignment text/questions, diagrams, screenshots, etc. (even if explicitly not asked) such that a reader or an evaluator of the report need not look into the other documents or submitted supporting files for understanding of your answers. Other submitted supporting files and live setups will be used for validation check of the answers.
+  - For screenshots of configuration files which are long, you should provide only those parts that are changed or added yourself. Also, avoid redundant screenshots. For example, if it is the same in different servers, give one and say that it is the same in other servers.
+  - Everything written in the report should be your own and **any form of copying is not acceptable**.
+  - Email submission will not be accepted. Therefore, submit on time to avoid any last-minute technical problem.
+  - Avoid multiple submissions. If done so, there is no guarantee that the most recent one will be used for the evaluation.
+  - Not following explicitly stated instructions will lead to deduction of points.
+  - If in case you couldn't make something working in your implementation, explain what and how you tried to troubleshoot and give a discussion on what do you think could be potential problem(s).
+  - Keep only those VMs in ALTO that are required for the tasks (If other VMs are created for some other purpose, delete/terminate them). Presence of any unnecessary VM would be considered as a wrong VM.
+  - One should not make any changes in ALTO cloud after your submission. Otherwise, it’s timestamp will be used as your submission date/time and this could lead to deduction of your score (second deadline) or rejection of your submission (after second deadline).
+  - There are two deadlines. If the first deadline is missed, 5% of the total score obtained will be deducted. No submission will be accepted after the second deadline.
+  - If there is anything not clear or confused or wondering about, do ask the course teacher *ON TIME*
