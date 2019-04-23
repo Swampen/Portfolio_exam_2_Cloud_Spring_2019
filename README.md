@@ -2,6 +2,10 @@
 
 # Portfolio-exam-2-Cloud
 
+**OBS!**
+Have to use HioA VPN solution to get access with openstack from outside the school's network:
+https://ansatt.oslomet.no/vpn-koble-filserver
+
 *This is the second portfolio exam which must be done and delivered in a group. This contributes 50% for your final grade.* 
 In this work, you will setup a cloud-based application architecture using LEMP stack in OpenStack (ALTO). It has a load balancer, three web servers, a database proxy and three database servers as shown in the figure below.
 
