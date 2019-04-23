@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Have to be run with "source openstack-connect.sh"
+
 # To use an OpenStack cloud you need to authenticate against the Identity
 # service named keystone, which returns a **Token** and **Service Catalog**.
 # The catalog contains the endpoints for all services the user/tenant has
@@ -41,3 +43,4 @@ if [ -z "$OS_REGION_NAME" ]; then unset OS_REGION_NAME; fi
 
 export OS_INTERFACE=public
 export OS_IDENTITY_API_VERSION=3
+
