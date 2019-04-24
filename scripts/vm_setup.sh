@@ -31,7 +31,7 @@ openstack security group rule create --protocol tcp
 
 openstack security group rule create --protocol tcp 
 	--dst-port 4567 
-	--remote-group dats06-securty dats06-security
+	--remote-group dats06-security dats06-security
 
 openstack security group rule create --protocol tcp 
 	--dst-port 4568 
