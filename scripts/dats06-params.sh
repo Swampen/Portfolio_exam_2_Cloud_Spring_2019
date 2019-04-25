@@ -1,5 +1,5 @@
 ################# Instance Naming Parameters ###############
-DBHOSTNAMES=("db1" "db2" "db3")
+DBHOSTNAMES=("dats06-db-1" "dats06-db-2" "dats06-db-3")
 DBPROXYNAME="MaxScale"
 WEBSERVERNAMES=("web1" "web2" "web3")
 LOADBALANCERNAME="lb"
