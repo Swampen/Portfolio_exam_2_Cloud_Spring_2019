@@ -50,7 +50,7 @@ sudo bash -c "echo 'server {
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/run/php/php7.0-fpm.sock;
-    }
+    }7
 
     location ~ /\.ht {
         deny all;
@@ -58,4 +58,4 @@ sudo bash -c "echo 'server {
 }' > /etc/nginx/sites-available/default"
 
 # Reboot to activate config
-sudo Reboot
+sudo reboot
