@@ -19,14 +19,39 @@ do
 	DBHOSTS="$DBHOSTS $hostIP"
 done
 
+
 # Extracting MaxScale host IP from hostname
 SCALEHOST=$(openstack server show $DBPROXYNAME | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}')
+
+# Generating host configstring for galeraserver
+galerahoststring=$( echo wsrep_cluster_address=gcomm://${DBHOSTNAMES[*]} | tr " " ",")
+
 
 
 ############### SETUP COMMANDS TO BE RUN ON DB SERVERS###############
 dbSetupCommands=("
-sudo apt-get update;
-sudo apt-get upgrade;
+sudo apt-get update -q;
+sudo apt-get upgrade -y;
+export DEBIAN_FRONTEND=noninteractive
+sudo debconf-set-selections <<< 'mariadb-server-10.0 mysql-server/root_password password PASS'
+sudo debconf-set-selections <<< 'mariadb-server-10.0 mysql-server/root_password_again password PASS'
+sudo apt-get install -y -q mariadb-server
+sudo bash -c 'echo \"[galera]
+binlog_format=row
+default-storage-engine=innodb
+innodb_autoinc_lock_mode=2
+bind-adress=0.0.0.0
+
+#Galera provider information
+wsrep_on=ON
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+
+# Galera Cluster Configuration
+$galerahoststring
+
+# Galera Synchronization Configuration
+wsrep_sst_method=rsync\" >> /etc/mysql/my.cnf'
+echo "great success"
 ")
 
 ############## SETUP COMMANDS TO BE RUN ON MAXSCALE SERVER #################
