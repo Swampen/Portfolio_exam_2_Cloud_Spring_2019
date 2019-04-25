@@ -4,20 +4,49 @@
 sudo apt update
 sudo apt install nginx
 
-#! starting nginx
+# starting nginx
 sudo systemctl start nginx.service
 
-#! mariaDB installation
-#! STOP: sudo systemctl stop nginx.service
-#! ENABLE: sudo systemctl enable nginx.service
+# mariaDB installation
+# STOP: sudo systemctl stop nginx.service
+# ENABLE: sudo systemctl enable nginx.service
 sudo apt-get install mariadb-server mariadb-client
 
-#! starting database
-#! STOP: sudo systemctl stop mysql.service
-#! ENABLE: sudo systemctl enable mysql.service
+# starting database
+# STOP: sudo systemctl stop mysql.service
+# ENABLE: sudo systemctl enable mysql.service
 sudo systemctl start mysql.service
 
-#! creating a root password and disallowing remote root access
+# creating a root password and disallowing remote root access
 sudo mysql_secure_installation
 
+# PHP instalation
+sudoapt-get install php-fpm
 
+# nginx config for php init
+echo
+"server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.php index.html index.htm index.nginx-debian.html;
+
+    server_name server_domain_or_IP;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}" > '/etc/nginx/sites-available/default'
+
+# Reboot to activate config
+sudo Reboot
