@@ -34,8 +34,7 @@ sudo chmod -R g+rw /var/www
 sudo apt-get install php-fpm
 
 # nginx config for php init
-echo
-"server {
+sudo bash -c "echo 'server {
     listen 80 default_server;
     listen [::]:80 default_server;
 
@@ -56,7 +55,7 @@ echo
     location ~ /\.ht {
         deny all;
     }
-}" > '/etc/nginx/sites-available/default'
+}' > /etc/nginx/sites-available/default"
 
 # Reboot to activate config
 sudo Reboot
