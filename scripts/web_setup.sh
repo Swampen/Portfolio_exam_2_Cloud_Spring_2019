@@ -20,12 +20,21 @@ sudo systemctl start mysql.service
 # creating a root password and disallowing remote root access
 sudo mysql_secure_installation
 
+# add user
+sudo adduser ubuntu www-data
+
+# change ownership
+sudo chow -R www-data:www-data /var/www
+
+# LOOK INTO PREMISION HANDLING
+# give full premision
+sudo chmod -R g+rw /var/www
+
 # PHP instalation
-sudoapt-get install php-fpm
+sudo apt-get install php-fpm
 
 # nginx config for php init
-echo
-"server {
+sudo bash -c "echo 'server {
     listen 80 default_server;
     listen [::]:80 default_server;
 
@@ -41,12 +50,12 @@ echo
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/run/php/php7.0-fpm.sock;
-    }
+    }7
 
     location ~ /\.ht {
         deny all;
     }
-}" > '/etc/nginx/sites-available/default'
+}' > /etc/nginx/sites-available/default"
 
 # Reboot to activate config
-sudo Reboot
+sudo reboot
