@@ -24,19 +24,18 @@ SCALEHOST=$(openstack server show $DBPROXYNAME | grep -o '[0-9]\{1,3\}\.[0-9]\{1
 
 
 ############### SETUP COMMANDS TO BE RUN ON DB SERVERS###############
-SCRIPT=("
-echo Hello Test;
-echo Hopes and prayers;
-hostname;
+dbSetupCommands=("
+sudo apt-get update;
+sudo apt-get upgrade;
 ")
 
 ############## SETUP COMMANDS TO BE RUN ON MAXSCALE SERVER #################
 
 
-echo "Running parallel ssh commands"
+echo "Starting dbServer setup"
 
 #parallell-ssh --askpass -i -H "$DBHOSTS" -l "$USERNAME" -x "-i $sshkey -o StrictHostKeyChecking=no "  < mkdir TEST
-parallel-ssh -i  -H "$DBHOSTS" -l "$USER" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$PROXYCOMMAND'" "$SCRIPT" 
+parallel-ssh -i  -H "$DBHOSTS" -l "$USER" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$PROXYCOMMAND'" "$dbSetupCommands" 
 
 echo "Done running parallel ssh commands"
 
