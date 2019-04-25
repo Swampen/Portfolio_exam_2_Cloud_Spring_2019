@@ -20,8 +20,18 @@ sudo systemctl start mysql.service
 # creating a root password and disallowing remote root access
 sudo mysql_secure_installation
 
+# add user
+sudo adduser ubuntu www-data
+
+# change ownership
+sudo chow -R www-data:www-data /var/www
+
+# LOOK INTO PREMISION HANDLING
+# give full premision
+sudo chmod -R g+rw /var/www
+
 # PHP instalation
-sudoapt-get install php-fpm
+sudo apt-get install php-fpm
 
 # nginx config for php init
 echo
