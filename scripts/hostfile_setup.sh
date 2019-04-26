@@ -25,7 +25,7 @@ sshProxyCommand="ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/n
 
 script=("
 sudo sed -i '1 i\\$ipEntry' /etc/hosts;
-sudo sed -i 's/LANG=.*/LANGUAGE=\"nb_NO.UTF-8\"\nLC_ALL=\"nb_NO.UTF-8\"/g' /etc/default/locale;
+sudo sed -i '$ a LANGUAGE=\"nb_NO.UTF-8\"\nLC_ALL=\"nb_NO.UTF-8\"' /etc/default/locale;
 sudo unlink /etc/localtime;
 sudo ln -s /usr/share/zoneinfo/Europe/etc/localtime /etc/localtime;
 sudo locale-gen nb_NO.UTF-8;
