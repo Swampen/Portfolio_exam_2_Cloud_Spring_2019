@@ -1,4 +1,8 @@
 #! /bin/bash
+#Assigning "booleans"
+WebOK=false
+DBPOK=false
+DBOK=false
 # Creates the security group
 openstack security group create dats06-security-1
 sleep 4
@@ -52,70 +56,82 @@ do
 	if [[ $WebOK = false ]]
 	then
 		#Create VM going here
+		echo "Creating webservers"
+		openstack server create \
+			--image 'Ubuntu16.04' \
+			--flavor m1.512MB4GB \
+			--security-group dats06-security-1 \
+			--key-name dats06-key \
+			--nic net-id=BSc_dats_network\
+       			--min 1 --max 3 --wait dats06-web1
 	fi
 
 	if [[ $DBPOK = false ]]
 	then
 		#Create VM going here
+		echo "Creating dbp"
+		openstack server create \
+			--image 'Ubuntu16.04' \
+			--flavor m1.512MB4GB \
+			--security-group dats06-security-1 \
+			--key-name dats06-key \
+			--nic net-id=BSc_dats_network \
+			--min 1 --max 1 --wait dats06-dbproxy1
 	fi
 
 	if [[ $DBOK = false ]]
 	then
 		#Create VM going here
+		echo "Creating dbs"
+		openstack server create \
+			--image 'Ubuntu16.04' \
+			--flavor m1.512MB4GB \
+			--security-group dats06-security-1 \
+			--key-name dats06-key \
+			--nic net-id=BSc_dats_network \
+			--min 1 --max 3 --wait dats06-db1
 	fi
 
-	sleep 5
 
 	failed=`openstack server list --status ERROR -c Name | awk '!/^$|Name/ {print $2;}'`
+
+	if [[ ${#failed} = 0 ]]
+	then
+		WebOK=true
+		DBOK=true
+		DBPOK=true
+	fi
+
 	for i in $failed
 	do
-		if [[ $i = "dats06-db*" ]] 
+		echo $i
+		if [[ $i =~ (dats06-db1-)([1-9]) ]] 
 		then
-			openstack delete $i
+			echo "deleting db"
+			openstack server delete --wait $i
 		else
-			$DBOK = true
+			DBOK=true
 		fi
 
-		if [[ $i = "dats06-web*" ]]
+		if [[ $i =~ (dats06-web1-)([1-9]) ]]
 		then
-			openstack delete $i
+			echo "deleteing web"
+			openstack server delete --wait $i
 		else
-			$WebOK = true
+			WebOK=true
 		fi
 
-		if [[ $i = "dats06-dbproxy" ]]
+		if [[ $i = "dats06-dbproxy1" ]]
 		then
-			openstack delete $i
+			echo "deleteing dbp"
+			openstack server delete --wait $i
 		else
-			$DBPOK = true
+			DBPOK=true
 		fi
-
-
+		echo "web $WebOK"
+		echo "db $DBOK"
+		echo "dbp $DBPOK"
+	done
 
 done
-
-
-#Creates 3 VMs to be used as web servers using Ubuntu16.04 and the m1.512MB4GB flavor
-openstack server create \
-	--image 'Ubuntu16.04' \
-	--flavor m1.512MB4GB \
-	--security-group dats06-security-1 \
-	--key-name dats06-key \
-	--nic net-id=BSc_dats_network\
-       	--min 1 --max 3 --wait dats06-web
-#Creates 1 VM to be used as a database proxy
-openstack server create \
-	--image 'Ubuntu16.04' \
-	--flavor m1.512MB4GB \
-	--security-group dats06-security-1 \
-	--key-name dats06-key \
-	--nic net-id=BSc_dats_network \
-	--min 1 --max 1 --wait dats06-dbproxy
-#Creates 3 VMs to be used as databases
-openstack server create \
-	--image 'Ubuntu16.04' \
-	--flavor m1.512MB4GB \
-	--security-group dats06-security-1 \
-	--key-name dats06-key \
-	--nic net-id=BSc_dats_network \
-	--min 1 --max 3 --wait dats06-db
+echo "setup complete"
