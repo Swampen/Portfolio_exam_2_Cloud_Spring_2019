@@ -56,7 +56,7 @@ do
 	if [[ $WebOK = false ]]
 	then
 		#Create VM going here
-		echo "Creating webservers"
+		echo "Creating Web Servers ..."
 		openstack server create \
 			--image 'Ubuntu16.04' \
 			--flavor m1.512MB4GB \
@@ -69,7 +69,7 @@ do
 	if [[ $DBPOK = false ]]
 	then
 		#Create VM going here
-		echo "Creating dbp"
+		echo "Creating Database Proxy ..."
 		openstack server create \
 			--image 'Ubuntu16.04' \
 			--flavor m1.512MB4GB \
@@ -82,7 +82,7 @@ do
 	if [[ $DBOK = false ]]
 	then
 		#Create VM going here
-		echo "Creating dbs"
+		echo "Creating Databases ..."
 		openstack server create \
 			--image 'Ubuntu16.04' \
 			--flavor m1.512MB4GB \
@@ -104,10 +104,9 @@ do
 
 	for i in $failed
 	do
-		echo $i
 		if [[ $i =~ (dats06-db1-)([1-9]) ]] 
 		then
-			echo "deleting db"
+			echo "Deleting Databases ..."
 			openstack server delete --wait $i
 		else
 			DBOK=true
@@ -115,7 +114,7 @@ do
 
 		if [[ $i =~ (dats06-web1-)([1-9]) ]]
 		then
-			echo "deleteing web"
+			echo "Deleting Web Servers ..."
 			openstack server delete --wait $i
 		else
 			WebOK=true
@@ -123,15 +122,12 @@ do
 
 		if [[ $i = "dats06-dbproxy1" ]]
 		then
-			echo "deleteing dbp"
+			echo "Deleting Database Proxy ..."
 			openstack server delete --wait $i
 		else
 			DBPOK=true
 		fi
-		echo "web $WebOK"
-		echo "db $DBOK"
-		echo "dbp $DBPOK"
 	done
 
 done
-echo "setup complete"
+echo "Setup complete!"
