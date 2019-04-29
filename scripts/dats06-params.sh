@@ -5,6 +5,9 @@ WEBSERVERNAMES=("web1" "web2" "web3")
 LOADBALANCERNAME="lb"
 
 
+################# VM setup paremeters #################
+# Locale parameter
+USERLOCALE="nb_NO.UTF-8"
 
 ################# dbSetup Parameters ######################
 

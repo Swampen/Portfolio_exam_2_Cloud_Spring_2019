@@ -1,12 +1,14 @@
 #! /bin/bash
 
+source dats06-params.sh
+
 echo "##### Editing /etc/hosts files #####"
-vmnames=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}'`)
+#vmnames=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}'`)
 
 ipSubnet="10\.10"
 for vm in ${!vmnames[@]}; do
         name=${vmnames[$vm]}
-        echo "Getting IP for $name"
+        echo -n "Getting IP for $name: "
         ip=$(openstack server show $name | grep -o "$ipSubnet\.[0-9]\{1,3\}\.[0-9]\{1,3\}")
 	echo "$ip"
         ipList="$ipList $ip"
@@ -23,13 +25,17 @@ sshProxyCommand="ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/n
 # sed s/dats06-web-/web/g
 # sed s/dats06-dbproxy/maxscale/g
 
+# FOR TESTING #
+ipList="10.10.6.147"
+ipEntry="10.10.6.147 vmtest"
+
 script=("
 sudo sed -i '1 i\\$ipEntry' /etc/hosts;
-sudo sed -i '$ a LANGUAGE=\"nb_NO.UTF-8\"\nLC_ALL=\"nb_NO.UTF-8\"' /etc/default/locale;
+sudo sed -i '$ a LANGUAGE=\"$USERLOCALE\"\nLC_ALL=\"$USERLOCALE\"' /etc/default/locale;
 sudo unlink /etc/localtime;
-sudo ln -s /usr/share/zoneinfo/Europe/etc/localtime /etc/localtime;
-sudo locale-gen nb_NO.UTF-8;
-sudo reboot;
+sudo ln -s /usr/share/zoneinfo/Europe/Oslo /etc/localtime;
+sudo locale-gen $USERLOCALE;
+sudo sed -i s/XKBLAYOUT=.*/XKBLAYOUT=\"no\"/g /etc/default/keyboard;
 ")
 
 test=("
@@ -42,19 +48,7 @@ parallel-ssh -i -H "$ipList" \
         -x "-i ~/.ssh/dats06-key.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
         "$script"
 
-echo "Waiting for VMs to reboot"
-sleep 1
-echo -n "."
-sleep 1
-echo -n "."
-sleep 1
-echo -n "."
-sleep 1
-echo -n "."
-sleep 1
-echo -n "."
-sleep 1
-echo -n "."
-sleep 1
-echo -n "."
-echo ""
+echo "Rebooting the VMs"
+for vm in ${!vmnames[@]}; do
+	openstack server reboot --wait ${!vmnames[$vm]}
+done
