@@ -12,7 +12,7 @@ Securitygroups=`openstack security group list --c Name | awk '!/^$|Name/ {print 
 # the boolean to true causing no new security group to be made
 for x in $Securitygroups
 do
-	if [[ $x = $SECURITYGROUP ]]
+	if [[ $x = $securityGroup ]]
 	then
 		SecGrExist=true
 	fi
@@ -20,7 +20,7 @@ done
 # Creates the security group if it doesn't exist
 if [[ $SecGrExist = false ]]
 then
-	openstack security group create $SECURITYGROUP
+	openstack security group create $securityGroup
 fi
 # sleeps for a little while so that the script will register that the SecGroup has been made
 sleep 4
@@ -30,42 +30,42 @@ openstack security group rule create \
 	--protocol tcp \
 	--dst-port 22 \
 	--description "Allows ssh inside the cloud" \
-	--remote-group $SECURITYGROUP $SECURITYGROUP
+	--remote-group $securityGroup $securityGroup
 # Permits ssh from the outside
 openstack security group rule create \
        	--protocol tcp \
        	--remote-ip 0.0.0.0/0 \
 	--description "Allows ssh from outside systems into the cloud" \
-	--dst-port 22 $SECURITYGROUP
+	--dst-port 22 $securityGroup
 # Permitting HTTP from the outside
 openstack security group rule create \
 	--protocol tcp \
 	--remote-ip 0.0.0.0/0 \
 	--description "Allows HTTP access from the outside" \
-	--dst-port 80 $SECURITYGROUP
+	--dst-port 80 $securityGroup
 # Permits MySQL client connection
 openstack security group rule create --protocol tcp \
 	--dst-port 3306 \
 	--description "Allows a MySQL client connection" \
-	--remote-group $SECURITYGROUP $SECURITYGROUP
+	--remote-group $securityGroup $securityGroup
 # Permits State Snapshot Transfer (SST)
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows State Snapshot Transfer" \
 	--dst-port 4444 \
-	--remote-group $SECURITYGROUP $SECURITYGROUP
+	--remote-group $securityGroup $securityGroup
 # Permits Galera cluster replication traffic
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows Galera cluster replication traffic" \
 	--dst-port 4567 \
-	--remote-group $SECURITYGROUP $SECURITYGROUP
+	--remote-group $securityGroup $securityGroup
 # Permits Incremental State Transfer (IST)
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows Incremental State Transfer" \
 	--dst-port 4568 \
-	--remote-group $SECURITYGROUP $SECURITYGROUP
+	--remote-group $securityGroup $securityGroup
 
 # Checks if the .ssh directory exists and if it doesn't make it and gives it permissions 755
 if [ -d "$HOME/.ssh/" ]
@@ -92,10 +92,10 @@ do
 		openstack server create \
 			--image 'Ubuntu16.04' \
 			--flavor m1.512MB4GB \
-			--security-group $SECURITYGROUP \
-			--key-name $KEYPAIRNAME \
+			--security-group $securityGroup \
+			--key-name $keyPairName \
 			--nic net-id=BSc_dats_network\
-       			--min 1 --max $NUMBEROFWEBSERVERS --wait $WEBSERVERNAME
+       			--min 1 --max $numberOfWebServers --wait $webServerName
 	fi
 
 	# If the database proxy isn't up and running make it
@@ -105,10 +105,10 @@ do
 		openstack server create \
 			--image 'Ubuntu16.04' \
 			--flavor m1.512MB4GB \
-			--security-group $SECURITYGROUP \
-			--key-name $KEYPAIRNAME \
+			--security-group $securityGroup \
+			--key-name $keyPairName \
 			--nic net-id=BSc_dats_network \
-			--min 1 --max 1 --wait $DBPROXYNAME
+			--min 1 --max 1 --wait $DBProxyName
 	fi
 
 	# If the databases aren't up and running make them
@@ -118,10 +118,10 @@ do
 		openstack server create \
 			--image 'Ubuntu16.04' \
 			--flavor m1.512MB4GB \
-			--security-group $SECURITYGROUP \
-			--key-name $KEYPAIRNAME \
+			--security-group $securityGroup \
+			--key-name $keyPairName \
 			--nic net-id=BSc_dats_network \
-			--min 1 --max $NUMBEROFDBS --wait $DBNAME
+			--min 1 --max $numberOfDBs --wait $DBName
 	fi
 
 	# Puts the name of all the servers which failed to start in an array
@@ -138,7 +138,7 @@ do
 	# Goes through the list and deletes the VMs that are not running correctly so that they can be relaunched, if not then set the corresponding boolean to true
 	for i in $failed
 	do
-		if [[ $i =~ ($DBNAME-)([1-9]) ]] 
+		if [[ $i =~ ($DBName-)([1-9]) ]]
 		then
 			echo "Deleting Databases ..."
 			openstack server delete --wait $i
@@ -146,7 +146,7 @@ do
 			DBOK=true
 		fi
 
-		if [[ $i =~ ($WEBSERVERNAME-)([1-9]) ]]
+		if [[ $i =~ ($webServerName-)([1-9]) ]]
 		then
 			echo "Deleting Web Servers ..."
 			openstack server delete --wait $i
@@ -154,7 +154,7 @@ do
 			WebOK=true
 		fi
 
-		if [[ $i = "$DBPROXYNAME" ]]
+		if [[ $i = "$DBProxyName" ]]
 		then
 			echo "Deleting Database Proxy ..."
 			openstack server delete --wait $i
