@@ -8,6 +8,8 @@ SecGrExist=false
 # Creates an array of all existing security groups
 Securitygroups=`openstack security group list --c Name | awk '!/^$|Name/ {print $2;}'`
 
+# Checks if a security group of the same name as the parameter exists andd if so changes
+# the boolean to true causing no new security group to be made
 for x in $Securitygroups
 do
 	if [[ $x = $SECURITYGROUP ]]
@@ -15,7 +17,7 @@ do
 		SecGrExist=true
 	fi
 done
-# Creates the security group
+# Creates the security group if it doesn't exist
 if [[ $SecGrExist = false ]]
 then
 	openstack security group create $SECURITYGROUP
@@ -27,47 +29,56 @@ sleep 4
 openstack security group rule create \
 	--protocol tcp \
 	--dst-port 22 \
-	--remote-group dats06-security-1 dats06-security-1
+	--description "Allows ssh inside the cloud" \
+	--remote-group $SECURITYGROUP $SECURITYGROUP
 # Permits ssh from the outside
 openstack security group rule create \
        	--protocol tcp \
        	--remote-ip 0.0.0.0/0 \
-	--dst-port 22 dats06-security-1
+	--description "Allows ssh from outside systems into the cloud" \
+	--dst-port 22 $SECURITYGROUP
 # Permitting HTTP from the outside
 openstack security group rule create \
 	--protocol tcp \
 	--remote-ip 0.0.0.0/0 \
-	--dst-port 80 dats06-security-1
-# Permits MySQL internally
+	--description "Allows HTTP access from the outside" \
+	--dst-port 80 $SECURITYGROUP
+# Permits MySQL client connection
 openstack security group rule create --protocol tcp \
 	--dst-port 3306 \
-	--remote-group dats06-security-1 dats06-security-1
-# Permits syncing in the galera cluster
+	--description "Allows a MySQL client connection" \
+	--remote-group $SECURITYGROUP $SECURITYGROUP
+# Permits State Snapshot Transfer (SST)
 openstack security group rule create \
 	--protocol tcp \
+	--description "Allows State Snapshot Transfer" \
 	--dst-port 4444 \
-	--remote-group dats06-security-1 dats06-security-1
+	--remote-group $SECURITYGROUP $SECURITYGROUP
+# Permits Galera cluster replication traffic
 openstack security group rule create \
 	--protocol tcp \
+	--description "Allows Galera cluster replication traffic" \
 	--dst-port 4567 \
-	--remote-group dats06-security-1 dats06-security-1
+	--remote-group $SECURITYGROUP $SECURITYGROUP
+# Permits Incremental State Transfer (IST)
 openstack security group rule create \
 	--protocol tcp \
+	--description "Allows Incremental State Transfer" \
 	--dst-port 4568 \
-	--remote-group dats06-security-1 dats06-security-1
+	--remote-group $SECURITYGROUP $SECURITYGROUP
 
 # Checks if the .ssh directory exists and if it doesn't make it and gives it permissions 755
 if [ -d "$HOME/.ssh/" ]
 then
-	echo "/.ssh exists"
+	
 else
 	mkdir ~/.ssh
 	chmod 755 ~/.ssh
 fi
 
 # Creates keypair and puts it in the .ssh folder and gives it permission 400 so that no one except the owner can read it
-openstack keypair create dats06-1-key > ~/.ssh/dats06-1-key.pem
-chmod 400 ~/.ssh/dats06-1-key.pem
+#openstack keypair create $KEYPAIRNAME > $KEYLOCATION
+#chmod 400 $KEYLOCATION
 # Sleep to let the system get some time to register that the key has been made
 sleep 4
 
@@ -81,10 +92,10 @@ do
 		openstack server create \
 			--image 'Ubuntu16.04' \
 			--flavor m1.512MB4GB \
-			--security-group dats06-security-1 \
-			--key-name dats06-key \
+			--security-group $SECURITYGROUP \
+			--key-name $KEYPAIRNAME \
 			--nic net-id=BSc_dats_network\
-       			--min 1 --max 3 --wait dats06-web1
+       			--min 1 --max $NUMBEROFWEBSERVERS --wait $WEBSERVERNAME
 	fi
 
 	# If the database proxy isn't up and running make it
@@ -94,10 +105,10 @@ do
 		openstack server create \
 			--image 'Ubuntu16.04' \
 			--flavor m1.512MB4GB \
-			--security-group dats06-security-1 \
-			--key-name dats06-key \
+			--security-group $SECURITYGROUP \
+			--key-name $KEYPAIRNAME \
 			--nic net-id=BSc_dats_network \
-			--min 1 --max 1 --wait dats06-dbproxy1
+			--min 1 --max 1 --wait $DBPROXYNAME
 	fi
 
 	# If the databases aren't up and running make them
@@ -107,10 +118,10 @@ do
 		openstack server create \
 			--image 'Ubuntu16.04' \
 			--flavor m1.512MB4GB \
-			--security-group dats06-security-1 \
-			--key-name dats06-key \
+			--security-group $SECURITYGROUP \
+			--key-name $KEYPAIRNAME \
 			--nic net-id=BSc_dats_network \
-			--min 1 --max 3 --wait dats06-db1
+			--min 1 --max $NUMBEROFDBS --wait $DBNAME
 	fi
 
 	# Puts the name of all the servers which failed to start in an array
@@ -127,7 +138,7 @@ do
 	# Goes through the list and deletes the VMs that are not running correctly so that they can be relaunched, if not then set the corresponding boolean to true
 	for i in $failed
 	do
-		if [[ $i =~ (dats06-db1-)([1-9]) ]] 
+		if [[ $i =~ ($DBNAME-)([1-9]) ]] 
 		then
 			echo "Deleting Databases ..."
 			openstack server delete --wait $i
@@ -135,7 +146,7 @@ do
 			DBOK=true
 		fi
 
-		if [[ $i =~ (dats06-web1-)([1-9]) ]]
+		if [[ $i =~ ($WEBSERVERNAME-)([1-9]) ]]
 		then
 			echo "Deleting Web Servers ..."
 			openstack server delete --wait $i
@@ -143,7 +154,7 @@ do
 			WebOK=true
 		fi
 
-		if [[ $i = "dats06-dbproxy1" ]]
+		if [[ $i = "$DBPROXYNAME" ]]
 		then
 			echo "Deleting Database Proxy ..."
 			openstack server delete --wait $i
