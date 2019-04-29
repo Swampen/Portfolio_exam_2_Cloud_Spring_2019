@@ -8,6 +8,8 @@ SecGrExist=false
 # Creates an array of all existing security groups
 Securitygroups=`openstack security group list --c Name | awk '!/^$|Name/ {print $2;}'`
 
+# Checks if a security group of the same name as the parameter exists andd if so changes
+# the boolean to true causing no new security group to be made
 for x in $Securitygroups
 do
 	if [[ $x = $SECURITYGROUP ]]
@@ -15,7 +17,7 @@ do
 		SecGrExist=true
 	fi
 done
-# Creates the security group
+# Creates the security group if it doesn't exist
 if [[ $SecGrExist = false ]]
 then
 	openstack security group create $SECURITYGROUP
@@ -38,19 +40,21 @@ openstack security group rule create \
 	--protocol tcp \
 	--remote-ip 0.0.0.0/0 \
 	--dst-port 80 $SECURITYGROUP
-# Permits MySQL internally
+# Permits MySQL client connection
 openstack security group rule create --protocol tcp \
 	--dst-port 3306 \
 	--remote-group $SECURITYGROUP $SECURITYGROUP
-# Permits syncing in the galera cluster
+# Permits State Snapshot Transfer (SST)
 openstack security group rule create \
 	--protocol tcp \
 	--dst-port 4444 \
 	--remote-group $SECURITYGROUP $SECURITYGROUP
+# Permits Galera cluster replication traffic
 openstack security group rule create \
 	--protocol tcp \
 	--dst-port 4567 \
 	--remote-group $SECURITYGROUP $SECURITYGROUP
+# Permits Incremental State Transfer (IST)
 openstack security group rule create \
 	--protocol tcp \
 	--dst-port 4568 \
