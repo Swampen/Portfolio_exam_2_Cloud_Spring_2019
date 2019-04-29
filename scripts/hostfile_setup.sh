@@ -21,7 +21,7 @@ MASTER_USER="dats06"
 MASTER_HOST="dats.vlab.cs.hioa.no"
 sshProxyCommand="ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR $MASTER_USER@$MASTER_HOST -W %h:%p"
 
-# sed s/dats06-db-/db/g 
+# sed s/dats06-db-/db/g
 # sed s/dats06-web-/web/g
 # sed s/dats06-dbproxy/maxscale/g
 
@@ -34,7 +34,7 @@ sudo sed -i '1 i\\$ipEntry' /etc/hosts;
 sudo sed -i '$ a LANGUAGE=\"$USERLOCALE\"\nLC_ALL=\"$USERLOCALE\"' /etc/default/locale;
 sudo unlink /etc/localtime;
 sudo ln -s /usr/share/zoneinfo/Europe/Oslo /etc/localtime;
-sudo locale-gen $USERLOCALE;
+sudo locale-gen $USERLOACALE;
 sudo sed -i s/XKBLAYOUT=.*/XKBLAYOUT=\"no\"/g /etc/default/keyboard;
 ")
 
