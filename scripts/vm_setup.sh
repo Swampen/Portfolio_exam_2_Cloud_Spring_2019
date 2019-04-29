@@ -29,34 +29,41 @@ sleep 4
 openstack security group rule create \
 	--protocol tcp \
 	--dst-port 22 \
+	--description "Allows ssh inside the cloud" \
 	--remote-group $SECURITYGROUP $SECURITYGROUP
 # Permits ssh from the outside
 openstack security group rule create \
        	--protocol tcp \
        	--remote-ip 0.0.0.0/0 \
+	--description "Allows ssh from outside systems into the cloud" \
 	--dst-port 22 $SECURITYGROUP
 # Permitting HTTP from the outside
 openstack security group rule create \
 	--protocol tcp \
 	--remote-ip 0.0.0.0/0 \
+	--description "Allows HTTP access from the outside" \
 	--dst-port 80 $SECURITYGROUP
 # Permits MySQL client connection
 openstack security group rule create --protocol tcp \
 	--dst-port 3306 \
+	--description "Allows a MySQL client connection" \
 	--remote-group $SECURITYGROUP $SECURITYGROUP
 # Permits State Snapshot Transfer (SST)
 openstack security group rule create \
 	--protocol tcp \
+	--description "Allows State Snapshot Transfer" \
 	--dst-port 4444 \
 	--remote-group $SECURITYGROUP $SECURITYGROUP
 # Permits Galera cluster replication traffic
 openstack security group rule create \
 	--protocol tcp \
+	--description "Allows Galera cluster replication traffic" \
 	--dst-port 4567 \
 	--remote-group $SECURITYGROUP $SECURITYGROUP
 # Permits Incremental State Transfer (IST)
 openstack security group rule create \
 	--protocol tcp \
+	--description "Allows Incremental State Transfer" \
 	--dst-port 4568 \
 	--remote-group $SECURITYGROUP $SECURITYGROUP
 
