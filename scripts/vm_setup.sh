@@ -70,7 +70,7 @@ openstack security group rule create \
 # Checks if the .ssh directory exists and if it doesn't make it and gives it permissions 755
 if [ -d "$HOME/.ssh/" ]
 then
-	
+	echo "Folder exists"	
 else
 	mkdir ~/.ssh
 	chmod 755 ~/.ssh
