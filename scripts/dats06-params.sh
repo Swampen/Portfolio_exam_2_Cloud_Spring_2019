@@ -1,6 +1,7 @@
 ################# Instance Naming Parameters ###############
 # Security group to use
 export securityGroup="dats06-security"
+export securityGroupLB="dats06-securityLB"
 
 # Names in cloud setup
 export DBName="dats06-db"

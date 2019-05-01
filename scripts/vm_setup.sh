@@ -4,6 +4,7 @@ WebOK=false
 DBPOK=false
 DBOK=false
 SecGrExist=false
+SecGrLBExist=false
 
 # Creates an array of all existing security groups
 Securitygroups=`openstack security group list --c Name | awk '!/^$|Name/ {print $2;}'`
@@ -17,10 +18,23 @@ do
 		SecGrExist=true
 	fi
 done
+
+for x in $Securitygroups
+do
+	if [[ $x = $securityGroupLB ]]
+	then
+		SecGrExistLB=true
+	fi
+done
 # Creates the security group if it doesn't exist
 if [[ $SecGrExist = false ]]
 then
 	openstack security group create $securityGroup
+fi
+
+if [[ $SecGrLBExist = false ]]
+then
+	openstack security group create $securityGroupLB
 fi
 # sleeps for a little while so that the script will register that the SecGroup has been made
 sleep 4
@@ -31,18 +45,36 @@ openstack security group rule create \
 	--dst-port 22 \
 	--description "Allows ssh inside the cloud" \
 	--remote-group $securityGroup $securityGroup
+	
+openstack security group rule create \
+	--protocol tcp \
+	--dst-port 22 \
+	--description "Allows ssh inside the cloud" \
+	--remote-group $securityGroupLB $securityGroupLB
 # Permits ssh from the outside
 openstack security group rule create \
        	--protocol tcp \
        	--remote-ip 0.0.0.0/0 \
 	--description "Allows ssh from outside systems into the cloud" \
 	--dst-port 22 $securityGroup
+
+openstack security group rule create \
+       	--protocol tcp \
+       	--remote-ip 0.0.0.0/0 \
+	--description "Allows ssh from outside systems into the cloud" \
+	--dst-port 22 $securityGroupLB
 # Permitting HTTP from the outside
 openstack security group rule create \
 	--protocol tcp \
 	--remote-ip 0.0.0.0/0 \
 	--description "Allows HTTP access from the outside" \
 	--dst-port 80 $securityGroup
+
+openstack security group rule create \
+	--protocol tcp \
+	--remote-ip 0.0.0.0/0 \
+	--description "Allows HTTP access from the outside" \
+	--dst-port 80 $securityGroupLB
 # Permits MySQL client connection
 openstack security group rule create --protocol tcp \
 	--dst-port 3306 \
