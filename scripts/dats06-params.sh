@@ -30,7 +30,7 @@ export userLocale="nb_NO.UTF-8"
 export keyPairName="dats06-key"
 
 # This is the loctation for the private-key to be used for accessing the vm
-export keyLocation="~/.ssh/$KEYPAIRNAME.pem"
+export keyLocation="~/.ssh/$keyPairName.pem"
 
 # Usename for logging into vms
 export user="ubuntu"
