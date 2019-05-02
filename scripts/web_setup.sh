@@ -7,10 +7,11 @@ sudo apt install nginx
 # starting nginx
 sudo systemctl start nginx.service
 
-# mariaDB installation
+# MariaDB installation
 # STOP: sudo systemctl stop nginx.service
 # ENABLE: sudo systemctl enable nginx.service
-sudo apt-get install mariadb-server mariadb-client
+# Adding the database client
+sudo apt-get install mariadb-client
 
 # starting database
 # STOP: sudo systemctl stop mysql.service
@@ -59,3 +60,5 @@ sudo bash -c "echo 'server {
 
 # Reboot to activate config
 sudo reboot
+
+
