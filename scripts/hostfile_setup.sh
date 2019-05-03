@@ -32,31 +32,28 @@ for i in ${!vmnames[@]}; do
 	#check=`echo "${vmnames[$i]}" | grep -E "$DBName-?[0-9]*|$DBProxyName|$LBName|$webServerName"`
   if [[ ${vmnames[$i]} = $DBProxyName ]]; then
     hostname=`echo ${vmnames[$i]} | sed s/$DBProxyName/$DBProxyHostName/g`
-    echo $hostname
+    echo $
     hostfileEntry=`echo $hostfileEntry | sed s/$DBProxyName/$DBProxyHostName/g`
     ip=${ipList[$i]}
-    ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "whoami"
-	elif [[ ${vmnames[$i]} =~ $DBName-?[0-9]* ]]; then
-		hostname=`echo ${vmnames[$i]} | sed -E s/$DBName-?/$DBHostName/g`
+    ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "sudo bash -c 'echo $hostname > /etc/hostname'"
+	elif [[ ${vmnames[$i]} =~ $DBName-[0-9]* ]]; then
+		hostname=`echo ${vmnames[$i]} | sed -E s/$DBName-/$DBHostName/g`
 		echo $hostname
-    hostfileEntry=`echo $hostfileEntry | sed -E s/$DBName-?/$DBHostName/g`
+    hostfileEntry=`echo $hostfileEntry | sed -E s/$DBName-/$DBHostName/g`
 		ip=${ipList[$i]}
-		ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "whoami"
-    # "sudo bash -c 'echo $hostname > /etc/hostname'"
-  elif [[ ${vmnames[$i]} =~ $webServerName-?[0-9]* ]]; then
-		hostname=`echo ${vmnames[$i]} | sed -E s/$webServerName-?/$webServerHostName/g`
+		ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "sudo bash -c 'echo $hostname > /etc/hostname'"
+  elif [[ ${vmnames[$i]} =~ $webServerName-[0-9]* ]]; then
+		hostname=`echo ${vmnames[$i]} | sed -E s/$webServerName-/$webServerHostName/g`
 		echo $hostname
-    hostfileEntry=`echo $hostfileEntry | sed -E s/$webServerName-?/$webServerHostName/g`
+    hostfileEntry=`echo $hostfileEntry | sed -E s/$webServerName-/$webServerHostName/g`
 		ip=${ipList[$i]}
-		ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "whoami"
-    # "sudo bash -c 'echo $hostname > /etc/hostname'"
+		ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "sudo bash -c 'echo $hostname > /etc/hostname'"
   elif [[ ${vmnames[$i]} = $LBName ]]; then
 		hostname=`echo ${vmnames[$i]} | sed s/$LBName/$LBHostName/g`
 		echo $hostname
     hostfileEntry=`echo $hostfileEntry | sed s/$LBName/$LBHostName/g`
 		ip=${ipList[$i]}
-		ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "whoami"
-    # "sudo bash -c 'echo $hostname > /etc/hostname'"
+		ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "sudo bash -c 'echo $hostname > /etc/hostname'"
 	else
     echo not found
   fi
@@ -64,7 +61,7 @@ done
 
 script=("
 sudo sed -i '1 i\\$hostfileEntry' /etc/hosts;
-sudo sed -i '$ a LANGUAGE=\"$USERLOCALE\"\nLC_ALL=\"$USERLOCALE\"' /etc/default/locale;
+sudo sed -i '$ a LANGUAGE=\"$userLocale\"\nLC_ALL=\"$userLocale \"' /etc/default/locale;
 sudo unlink /etc/localtime;
 sudo ln -s /usr/share/zoneinfo/Europe/Oslo /etc/localtime;
 sudo locale-gen $userLocale;
@@ -76,16 +73,14 @@ echo Hello World;
 hostname;
 ")
 
-# parallel-ssh -i -H "${ipList[*]}" \
-#         -l $username \
-#         -x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$proxyCommand'" \
-#         "$test"
+parallel-ssh -i -H "${ipList[*]}" \
+        -l $username \
+        -x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
+        "$script"
 
-# echo "Rebooting the VMs"
-# for i in ${!vmnames[@]}; do
-#   let n=i+1
-# 	echo -n "$n/${#vmnames[@]} - rebooting ${vmnames[$i]} - "
-#   openstack server reboot --wait ${vmnames[$i]}
-# done
-
-# ssh -i ~/.ssh/dats06-key.pem ubuntu@10.10.4.41 -o ProxyCommand="ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR $MASTER_USER@$MASTER_HOST -W %h:%p"
+echo "Rebooting the VMs"
+for i in ${!vmnames[@]}; do
+  let n=i+1
+	echo -n "$n/${#vmnames[@]} - rebooting ${vmnames[$i]} - "
+  openstack server reboot --wait ${vmnames[$i]}
+done

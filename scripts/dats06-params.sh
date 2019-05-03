@@ -19,19 +19,18 @@ export LBHostName="lb"
 
 ################# VM setup paremeters #################
 # ssh parameters
-export username="ubuntu"
 # This is the name to be used for creation of the keypair used for authentication
 export keyPairName="dats06-key"
 # This is the loctation for the private-key to be used for accessing the vm
 export sshKeyLocation="~/.ssh/$keyPairName.pem"
 # Usename for logging into vms
-export user="ubuntu"
+export username="ubuntu"
 # Name of master host
 export masterHost="dats.vlab.cs.hioa.no"
 # Name of user on master host
 export masterUser="dats06"
 # Proxycommand for ssh into vms
-export proxyCommand="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR $masterUser@$masterHost -W %h:%p"
+export sshProxyCommand="ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR $masterUser@$masterHost -W %h:%p"
 # Locale parameter
 export userLocale="nb_NO.UTF-8"
 
