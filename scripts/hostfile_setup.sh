@@ -61,7 +61,7 @@ done
 
 script=("
 sudo sed -i '1 i\\$hostfileEntry' /etc/hosts;
-sudo sed -i '$ a LANGUAGE=\"$userLocale\"\nLC_ALL=\"$userLocale \"' /etc/default/locale;
+sudo sed -i '$ a LANGUAGE=\"$userLocale\"\nLC_ALL=\"$userLocale\"' /etc/default/locale;
 sudo unlink /etc/localtime;
 sudo ln -s /usr/share/zoneinfo/Europe/Oslo /etc/localtime;
 sudo locale-gen $userLocale;

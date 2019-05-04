@@ -2,7 +2,7 @@
 
 #! installation off nginx
 sudo apt update
-sudo apt install nginx
+sudo apt install nginx -y
 
 # starting nginx
 sudo systemctl start nginx.service
@@ -25,14 +25,14 @@ sudo mysql_secure_installation
 sudo adduser ubuntu www-data
 
 # change ownership
-sudo chow -R www-data:www-data /var/www
+sudo chown -R www-data:www-data /var/www
 
 # LOOK INTO PREMISION HANDLING
 # give full premision
 sudo chmod -R g+rw /var/www
 
 # PHP instalation
-sudo apt-get install php-fpm
+sudo apt-get install php-fpm -y
 
 # nginx config for php init
 sudo bash -c "echo 'server {
