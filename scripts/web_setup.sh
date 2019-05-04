@@ -1,5 +1,8 @@
 #! /bin/bash
 
+
+#Hostname File
+
 #! installation off nginx
 sudo apt update
 sudo apt install nginx
@@ -13,6 +16,9 @@ sudo systemctl start nginx.service
 # Adding the database client
 sudo apt-get install mariadb-client
 
+#install off crontab
+sudo apt get install crontab
+
 # starting database
 # STOP: sudo systemctl stop mysql.service
 # ENABLE: sudo systemctl enable mysql.service
@@ -23,6 +29,7 @@ sudo mysql_secure_installation
 
 # add user
 sudo adduser ubuntu www-data
+
 
 # change ownership
 sudo chow -R www-data:www-data /var/www
