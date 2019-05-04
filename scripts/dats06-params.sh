@@ -9,31 +9,29 @@ export numberOfDBs=3
 export DBProxyName="dats06-dbproxy"
 export webServerName="dats06-web"
 export numberOfWebServers=3
+export LBName="dats06-lb"
 
 # Naming of hosts
 export DBHostName="db"
 export DBProxyHostName="maxscale"
 export webServerHostName="web"
-export loadBalancerHostName="lb"
-
-
+export LBHostName="lb"
 
 ################# VM setup paremeters #################
+# ssh parameters
+# This is the name to be used for creation of the keypair used for authentication
+export keyPairName="dats06-key"
+# This is the loctation for the private-key to be used for accessing the vm
+export sshKeyLocation="~/.ssh/$keyPairName.pem"
+# Usename for logging into vms
+export username="ubuntu"
+# Name of master host
+export masterHost="dats.vlab.cs.hioa.no"
+# Name of user on master host
+export masterUser="dats06"
+# Proxycommand for ssh into vms
+export sshProxyCommand="ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR $masterUser@$masterHost -W %h:%p"
 # Locale parameter
 export userLocale="nb_NO.UTF-8"
 
 ################# dbSetup Parameters ######################
-
-
-
-# This is the name to be used for creation of the keypair used for authentication
-export keyPairName="dats06-key"
-
-# This is the loctation for the private-key to be used for accessing the vm
-export keyLocation="~/.ssh/$KEYPAIRNAME.pem"
-
-# Usename for logging into vms
-export user="ubuntu"
-
-# Proxycommand for ssh into vms
-export proxyCommand="ssh dats06@dats.vlab.cs.hioa.no -W %h:%p"

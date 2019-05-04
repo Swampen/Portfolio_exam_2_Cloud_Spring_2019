@@ -5,7 +5,7 @@
 
 #! installation off nginx
 sudo apt update
-sudo apt install nginx
+sudo apt install nginx -y
 
 # starting nginx
 sudo systemctl start nginx.service
@@ -32,14 +32,14 @@ sudo adduser ubuntu www-data
 
 
 # change ownership
-sudo chow -R www-data:www-data /var/www
+sudo chown -R www-data:www-data /var/www
 
 # LOOK INTO PREMISION HANDLING
 # give full premision
 sudo chmod -R g+rw /var/www
 
 # PHP instalation
-sudo apt-get install php-fpm
+sudo apt-get install php-fpm -y
 
 # nginx config for php init
 sudo bash -c "echo 'server {
@@ -49,7 +49,8 @@ sudo bash -c "echo 'server {
     root /var/www/html;
     index index.php index.html index.htm index.nginx-debian.html;
 
-    server_name server_domain_or_IP;
+                # Need to be changed dynamically by the script
+    server_name server_name_or_IP;
 
     location / {
         try_files $uri $uri/ =404;
@@ -58,7 +59,7 @@ sudo bash -c "echo 'server {
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/run/php/php7.0-fpm.sock;
-    }7
+    }
 
     location ~ /\.ht {
         deny all;
@@ -66,6 +67,5 @@ sudo bash -c "echo 'server {
 }' > /etc/nginx/sites-available/default"
 
 # Reboot to activate config
+sudo service nginx restart
 sudo reboot
-
-
