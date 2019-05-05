@@ -30,14 +30,12 @@ galerahoststring=$( echo wsrep_cluster_address=gcomm://${DBHOSTNAMES[*]} | tr " 
 
 ############### SETUP COMMANDS TO BE RUN ON DB SERVERS###############
 dbSetupCommands=("
-sudo dpkg --configure -a;
-sudo apt-get -y --purge remove "mysql*"
-sudo rm -rf /etc/mysql/
-sudo apt-get -y install software-properties-common;
+sudo apt-get update -y;
+sudo apt-get upgrade -y;
 sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8;
-sudo add-apt-repository 'deb [arch=amd64,i386] http://sgp1.mirrors.digitalocean.com/mariadb/repo/10.1/ubuntu xenial main';
-sudo apt-get update -q;
-sudo apt-get install -y -q mariadb-server;
+sudo add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.1/ubuntu xenial main';
+sudo apt-get update -y;
+RUN DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server rsync -y;
 ")
 #export DEBIAN_FRONTEND=noninteractive;
 #sudo debconf-set-selections <<< 'mariadb-server-10.1 mysql-server/root_password password PASS';
