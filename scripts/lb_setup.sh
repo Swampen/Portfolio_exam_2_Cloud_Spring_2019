@@ -1,5 +1,13 @@
 #! /bin/bash
 
+webServers=()
+
+webs=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}' | grep $webServerName | sed s/$webServerName-/$webServerHostName/g`)
+HAProxyEntry=""
+for i in ${!webs[@]}; do
+    HAProxyEntry="server $webServerHostName-$i ${webs[$i]}:80 check weight 10 \\n$HAProxyEntry"
+done
+
 setup=("
 sudo apt-get install haproxy -y
 sudo sed -i '$ a ENABLED=1' /etc/default/haproxy
