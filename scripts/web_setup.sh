@@ -50,7 +50,7 @@ sudo bash -c "echo 'server {
     listen 80 default_server;
     listen [::]:80 default_server;
 
-    root /var/www/Portfolio_exam_deployment;
+    root /var/www/html/Portfolio_exam_deployment;
     index index.php index.html index.htm index.nginx-debian.html;
 
                 # Need to be changed dynamically by the script
@@ -72,36 +72,35 @@ sudo bash -c "echo 'server {
 
 # Reboot to activate config
 sudo service nginx restart
-sudo reboot
+
 
 hs=`hostname`
 
-if [ $hs = web1 ];
+if [[ $hs = "web1" ]];
 then
 
     #Going to production directory
-    cd /var/www/
+    cd /var/www/html
         #git init and pulling down the files used in this project
         git clone https://github.com/JakobSimonsen/Portfolio_exam_deployment.git
-        #sleep function to ensure that the github repo is cloned down before going to the next task.
-        sleep 10
+        
 
 fi
 
 # Script that get executed by the crontab command under.
 # Since we itterate over the webservers and push to each one we needed to make a script file for it.
-cd ~/home
-    sudo bash -C "echo '
+cd ~/
+    sudo bash -c "echo '
     #!/bin/sh
-    cd /var/www/Portfolio_exam_deployment
+    cd /var/www/html/Portfolio_exam_deployment
     git pull
     for i in 2 3
     do
-    rsync -avz -e 'ssh -i dats06-key.pem' /var/www ubuntu@web$i:/var/www
+    rsync -avz -e ssh -i dats06-key.pem /var/www/html ubuntu@web$i:/var/www/html
     done' > rsyncScript.sh"
 
 # Initial pull down from git repo
-cd /var/www/Portfolio_exam_deployment
+cd /var/www/html/Portfolio_exam_deployment
     git pull
 
-*/3 * * * * ~/home/rsyncScript.sh
+*/3 * * * * ~/rsyncScript.sh
