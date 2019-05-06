@@ -104,3 +104,4 @@ cd /var/www/html/Portfolio_exam_deployment
     git pull
 
 */3 * * * * ~/rsyncScript.sh
+
