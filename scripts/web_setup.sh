@@ -50,8 +50,8 @@ sudo bash -c "echo 'server {
     listen 80 default_server;
     listen [::]:80 default_server;
 
-    root /var/www/html/Portfolio_exam_deployment;
-    index index.php index.html index.htm index.nginx-debian.html;
+    root /var/www/html;
+    index index.php test.php index.html index.htm index.nginx-debian.html;
 
                 # Need to be changed dynamically by the script
     server_name server_name_or_IP;
@@ -80,9 +80,8 @@ if [[ $hs = "web1" ]];
 then
 
     #Going to production directory
-    cd /var/www/html
         #git init and pulling down the files used in this project
-        git clone https://github.com/JakobSimonsen/Portfolio_exam_deployment.git
+        git clone https://github.com/JakobSimonsen/Portfolio_exam_deployment.git /var/www/html
         
 
 fi
@@ -92,7 +91,7 @@ fi
 cd ~/
     sudo bash -c "echo '
     #!/bin/sh
-    cd /var/www/html/Portfolio_exam_deployment
+    cd /var/www/html
     git pull
     for i in 2 3
     do
@@ -100,8 +99,13 @@ cd ~/
     done' > rsyncScript.sh"
 
 # Initial pull down from git repo
-cd /var/www/html/Portfolio_exam_deployment
+cd /var/www/html
     git pull
 
-*/3 * * * * ~/rsyncScript.sh
 
+hs=`hostname`
+
+if [[ $hs = "web1" ]];
+then
+(crontab -l ; echo "**/3 * * * * /bin/bash /home/ubuntu/rsyncScript.sh")| crontab -
+fi
