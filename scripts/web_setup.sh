@@ -75,8 +75,6 @@ sudo bash -c "echo 'server {
 sudo service nginx restart
 sudo reboot
 
-
-
 hs=`hostname`
 
 if [ $hs = web1 ];
@@ -103,4 +101,4 @@ done' > rsyncScript.sh"
 cd /var/www/Portfolio_exam_deployment
 git pull
 
-*/5 * * * * ~/home/rsyncScript.sh
+*/3 * * * * ~/home/rsyncScript.sh
