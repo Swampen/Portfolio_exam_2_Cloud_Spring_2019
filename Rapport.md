@@ -7,7 +7,7 @@ https://ansatt.oslomet.no/vpn-koble-filserver
 *This is the second portfolio exam which must be done and delivered in a group. This contributes 50% for your final grade.* 
 In this work, you will setup a cloud-based application architecture using LEMP stack in OpenStack (ALTO). It has a load balancer, three web servers, a database proxy and three database servers as shown in the figure below.
 
-![1554978491544](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1554978491544.png)
+![1554978491544](img/1554978491544.png)
 
 ------
 
@@ -62,7 +62,7 @@ The whole work is divided into different tasks listed below, which include <span
 
    | VMs            | Hostname | IP   | Flavor      | Software | Ports |
    | -------------- | -------- | ---- | ----------- | -------- | ----- |
-   | dats06-lb      | lb       |      | m1.1GB      |          |       |
+   | dats06-lb      | lb       |      | m1.1GB      | HAProxy  |       |
    | dats06-web-1   | web1     |      | m1.512MB4GB |          |       |
    | dats06-web-2   | web2     |      | m1.512MB4GB |          |       |
    | dats06-web-3   | web3     |      | m1.512MB4GB |          |       |
