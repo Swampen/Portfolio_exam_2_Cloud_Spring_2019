@@ -31,18 +31,18 @@ The whole work is divided into different tasks listed below, which include <span
 
    - [ ] An architecture diagram of your cloud setup, where all the VMs are labeled with VM names,
      and IPs.
-   - [ ] Screenshots from ALTO showing created ssh key, security group and security group rules. Label security group rules indicating purpose of the rules.
-   - [ ] A screenshot of the list of VMs created.
-   - [ ] A screenshot of the host names defined in /etc/hosts of one of the servers (say, datsXX-lb). Give short hostnames to the servers here, such as lb, web1, web2, web3, db1, db2, db3, and
+   - [x] Screenshots from ALTO showing created ssh key, security group and security group rules. Label security group rules indicating purpose of the rules.
+   - [x] A screenshot of the list of VMs created.
+   - [x] A screenshot of the host names defined in /etc/hosts of one of the servers (say, datsXX-lb). Give short hostnames to the servers here, such as lb, web1, web2, web3, db1, db2, db3, and
      maxscale and use names in all the configurations instead of hard coded IPs.
    - [ ] A table listing the VMs with these information: VM name, hostname, IP, flavor, software you
      installed in the VM, and ports used for specific purpose(s).
 
 2. **HAProxy setup**: Setup HAProxy for the load balancer and monitoring. Load balancer should use round robin algorithm with equal weights. HAProxy monitoring page should be configured such that it can be accessed from the url, <span href="dats.vlab.cs.hioa.no:8006/stats" style="color: blue">dats.vlab.cs.hioa.no:80XX/stats</span>. Use your ALTO credentials for the authentication purpose.
 
-   - [ ] Provide screenshots of the HAProxy configuration.
+   - [x] Provide screenshots of the HAProxy configuration.
 
-   - [ ] Provide screenshot of the resulting monitoring web page.
+   - [x] Provide screenshot of the resulting monitoring web page.
 
    - [ ] Show screenshots of the test results confirming working load balancer by curling a web page <span style="color: blue">testlb.php</span> in a loop from a local computer (e.g., your laptop), which shows alternately changing the web server IP. 
 
