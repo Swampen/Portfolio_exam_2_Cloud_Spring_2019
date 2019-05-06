@@ -43,7 +43,6 @@ sudo apt-get install php-fpm -y
 
 # Installing git to pull down repo from git
 sudo apt install git-all
-cd ~/home
 
 
 # nginx config for php init
@@ -88,17 +87,21 @@ then
         sleep 10
 
 fi
-sudo bash -C "echo '
-#!/bin/sh
-cd /var/www/Portfolio_exam_deployment
-git pull
-for i in 2 3
-do
-rsync -avz -e 'ssh -i dats06-key.pem' /var/www ubuntu@web$i:/var/www
-done' > rsyncScript.sh"
 
-#pull down from git repo
+# Script that get executed by the crontab command under.
+# Since we itterate over the webservers and push to each one we needed to make a script file for it.
+cd ~/home
+    sudo bash -C "echo '
+    #!/bin/sh
+    cd /var/www/Portfolio_exam_deployment
+    git pull
+    for i in 2 3
+    do
+    rsync -avz -e 'ssh -i dats06-key.pem' /var/www ubuntu@web$i:/var/www
+    done' > rsyncScript.sh"
+
+# Initial pull down from git repo
 cd /var/www/Portfolio_exam_deployment
-git pull
+    git pull
 
 */3 * * * * ~/home/rsyncScript.sh
