@@ -44,7 +44,7 @@ The whole work is divided into different tasks listed below, which include <span
 
    - [x] Provide screenshot of the resulting monitoring web page.
 
-   - [ ] Show screenshots of the test results confirming working load balancer by curling a web page <span style="color: blue">testlb.php</span> in a loop from a local computer (e.g., your laptop), which shows alternately changing the web server IP. 
+   - [x] Show screenshots of the test results confirming working load balancer by curling a web page <span style="color: blue">testlb.php</span> in a loop from a local computer (e.g., your laptop), which shows alternately changing the web server IP. 
 
      
 

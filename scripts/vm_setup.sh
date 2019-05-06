@@ -45,7 +45,7 @@ openstack security group rule create \
 	--dst-port 22 \
 	--description "Allows ssh inside the cloud" \
 	--remote-group $securityGroup $securityGroup
-	
+
 # Permits ssh from the outside
 openstack security group rule create \
        	--protocol tcp \
@@ -213,7 +213,19 @@ for vm in ${vmnames[@]}; do
        ip=$(openstack server show $name | grep -o "$ipSubnet\.[0-9]\{1,3\}\.[0-9]\{1,3\}")
        echo "$ip"
        ipList+=("$ip")
-       hostfileEntry="$ip $name \\n$hostfileEntry"
+       name2=""
+      if [[ $name = $DBProxyName ]]; then
+          name2=`echo $name | sed s/$DBProxyName/$DBProxyHostName/g`
+      elif [[ $name =~ $DBName-[0-9]* ]]; then
+          name2=`echo $name | sed -E s/$DBName-/$DBHostName/g`
+      elif [[ $name =~ $webServerName-[0-9]* ]]; then
+          name2=`echo $name | sed -E s/$webServerName-/$webServerHostName/g`
+      elif [[ $name = $LBName ]]; then
+          name2=`echo $name | sed s/$LBName/$LBHostName/g`
+      else
+          echo not found
+      fi
+      hostfileEntry="$ip $name $name2 \\n$hostfileEntry"
 done
 
 # Updates and upgrades the VMs using a parallel ssh
@@ -225,42 +237,6 @@ parallel-ssh -i -H "${ipList[*]}" \
         -l $username \
 	 -x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
 	"$update"
-
-# Changing hostname of all the VMs to what is specified
-# in the parameter file
-for i in ${!vmnames[@]}; do
-   	let n=i+1
-	echo -n "$n/${#vmnames[@]} - ${vmnames[$i]} - "
-	ip=""
-	hostname=""
-	if [[ ${vmnames[$i]} = $DBProxyName ]]; then
-		hostname=`echo ${vmnames[$i]} | sed s/$DBProxyName/$DBProxyHostName/g`
-		echo $hostname
-		hostfileEntry=`echo $hostfileEntry | sed s/$DBProxyName/$DBProxyHostName/g`
-		ip=${ipList[$i]}
-		ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "sudo bash -c 'echo $hostname > /etc/hostname'"
-	elif [[ ${vmnames[$i]} =~ $DBName-[0-9]* ]]; then
-		hostname=`echo ${vmnames[$i]} | sed -E s/$DBName-/$DBHostName/g`
-		echo $hostname
-		hostfileEntry=`echo $hostfileEntry | sed -E s/$DBName-/$DBHostName/g`
-		ip=${ipList[$i]}
-		ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "sudo bash -c 'echo $hostname > /etc/hostname'"
-	elif [[ ${vmnames[$i]} =~ $webServerName-[0-9]* ]]; then
-	 	hostname=`echo ${vmnames[$i]} | sed -E s/$webServerName-/$webServerHostName/g`
-		echo $hostname
-		hostfileEntry=`echo $hostfileEntry | sed -E s/$webServerName-/$webServerHostName/g`
-		ip=${ipList[$i]}
-		ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "sudo bash -c 'echo $hostname > /etc/hostname'"
-	elif [[ ${vmnames[$i]} = $LBName ]]; then
-		hostname=`echo ${vmnames[$i]} | sed s/$LBName/$LBHostName/g`
-		echo $hostname
-		hostfileEntry=`echo $hostfileEntry | sed s/$LBName/$LBHostName/g`
-		ip=${ipList[$i]}
-		ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "sudo bash -c 'echo $hostname > /etc/hostname'"
-	else
-		echo not found
-	fi
-done
 
 # The commands that will execute over paralell ssh
 # Will do an entry in the hosts file with the required hosts

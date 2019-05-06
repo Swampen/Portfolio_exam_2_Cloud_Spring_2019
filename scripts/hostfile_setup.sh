@@ -18,16 +18,12 @@ for vm in ${vmnames[@]}; do
        name2=""
       if [[ $name = $DBProxyName ]]; then
           name2=`echo $name | sed s/$DBProxyName/$DBProxyHostName/g`
-          echo $name2
       elif [[ $name =~ $DBName-[0-9]* ]]; then
           name2=`echo $name | sed -E s/$DBName-/$DBHostName/g`
-          echo $name2
       elif [[ $name =~ $webServerName-[0-9]* ]]; then
           name2=`echo $name | sed -E s/$webServerName-/$webServerHostName/g`
-          echo $name2
       elif [[ $name = $LBName ]]; then
           name2=`echo $name | sed s/$LBName/$LBHostName/g`
-          echo $name2
       else
           echo not found
       fi
