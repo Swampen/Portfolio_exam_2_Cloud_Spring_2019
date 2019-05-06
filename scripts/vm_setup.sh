@@ -46,11 +46,6 @@ openstack security group rule create \
 	--description "Allows ssh inside the cloud" \
 	--remote-group $securityGroup $securityGroup
 	
-openstack security group rule create \
-	--protocol tcp \
-	--dst-port 22 \
-	--description "Allows ssh inside the cloud" \
-	--remote-group $securityGroupLB $securityGroupLB
 # Permits ssh from the outside
 openstack security group rule create \
        	--protocol tcp \
@@ -58,11 +53,6 @@ openstack security group rule create \
 	--description "Allows ssh from outside systems into the cloud" \
 	--dst-port 22 $securityGroup
 
-openstack security group rule create \
-       	--protocol tcp \
-       	--remote-ip 0.0.0.0/0 \
-	--description "Allows ssh from outside systems into the cloud" \
-	--dst-port 22 $securityGroupLB
 # Permitting HTTP from the outside
 openstack security group rule create \
 	--protocol tcp \
@@ -97,6 +87,19 @@ openstack security group rule create \
 	--protocol tcp \
 	--description "Allows Incremental State Transfer" \
 	--dst-port 4568 \
+	--remote-group $securityGroup $securityGroup
+
+# Permits Munin to run for monitoring purposes
+openstack security group rule create \
+	--protocol tcp
+	--description "Allows Munin" \
+	--dst-port 4949
+	--remote-ip  0.0.0.0/0 $securityGroup
+
+openstack security group rule create \
+	--protocol tcp \
+	--description "Allows Munin" \
+	--dst-port 4949 \
 	--remote-group $securityGroup $securityGroup
 
 # Checks if the .ssh directory exists and if it doesn't make it and gives it permissions 755
