@@ -1,9 +1,14 @@
 #! /bin/bash
 
+webServers=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}' | grep $webServerName`)
+ipList=()
+for vm in ${webServers[@]}; do
+    ip=$(openstack server show $vm | grep -o "$ipSubnet\.[0-9]\{1,3\}\.[0-9]\{1,3\}")
+    ipList+=("$ip")
+done
 
-#Hostname File
 
-#! installation off nginx
+# installation off nginx
 sudo apt update
 sudo apt install nginx -y
 
@@ -53,7 +58,6 @@ sudo bash -c "echo 'server {
     root /var/www/html;
     index index.php test.php index.html index.htm index.nginx-debian.html;
 
-                # Need to be changed dynamically by the script
     server_name server_name_or_IP;
 
     location / {
@@ -70,19 +74,16 @@ sudo bash -c "echo 'server {
     }
 }' > /etc/nginx/sites-available/default"
 
+ssh -i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand' $username@
 # Reboot to activate config
 sudo service nginx restart
 
 hs=`hostname`
 
-if [[ $hs = "web1" ]];
-then
-
+if [[ $hs = "web1" ]]; then
     #Going to production directory
-        #git init and pulling down the files used in this project
-        git clone https://github.com/JakobSimonsen/Portfolio_exam_deployment.git /var/www/html
-        
-
+    #git init and pulling down the files used in this project
+    git clone https://github.com/JakobSimonsen/Portfolio_exam_deployment.git /var/www/html
 fi
 
 # Script that get executed by the crontab command under.
@@ -98,13 +99,9 @@ done' > rsyncScript.sh"
 
 # Initial pull down from git repo
 cd /var/www/html
-    git pull
-
-
+git pull
 hs=`hostname`
-
-if [[ $hs = "web1" ]];
-then
-sudo apt-get install cron
-(crontab -l ; echo "*/3 * * * * /bin/bash /home/ubuntu/rsyncScript.sh")| crontab -
+if [[ $hs = "web1" ]]; then
+    sudo apt-get install cron
+    (crontab -l ; echo "*/3 * * * * /bin/bash /home/ubuntu/rsyncScript.sh") | crontab -
 fi
