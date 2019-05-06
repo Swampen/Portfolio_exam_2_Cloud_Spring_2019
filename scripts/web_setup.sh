@@ -73,7 +73,6 @@ sudo bash -c "echo 'server {
 # Reboot to activate config
 sudo service nginx restart
 
-
 hs=`hostname`
 
 if [[ $hs = "web1" ]];

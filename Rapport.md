@@ -36,26 +36,26 @@ The whole work is divided into different tasks listed below, which include <span
 
    Security groups:
 
-   ![1557132863439](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557132863439.png)
+   ![1557132863439](img/1557132863439.png)
 
    Rules of dats06-security:
 
-   ![1557133121691](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557133121691.png)
+   ![1557133121691](img/1557133121691.png)
 
    Keypairs:
 
-   ![1557133197127](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557133197127.png)
+   ![1557133197127](img/1557133197127.png)
 
 3. A screenshot of the list of VMs created.
 
-    ![1557133367555](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557133367555.png)
+    ![1557133367555](img/1557133367555.png)
 
 4. A screenshot of the host names defined in /etc/hosts of one of the servers (say, datsXX-lb). Give short hostnames to the servers here, such as lb, web1, web2, web3, db1, db2, db3, and
    maxscale and use names in all the configurations instead of hard coded IPs.
 
    Load balancer's hosts file
 
-   ![1557133775942](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557133775942.png)
+   ![1557133775942](img/1557133775942.png)
 
 5. A table listing the VMs with these information: VM name, hostname, IP, flavor, software you
    installed in the VM, and ports used for specific purpose(s).
@@ -79,15 +79,17 @@ The whole work is divided into different tasks listed below, which include <span
 
   HAproxy config
 
-  ![1557134437526](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557134437526.png)
+  ![1557134437526](img/1557134437526.png)
 
-  ![1557134478098](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557134478098.png)
+  ![1557134478098](img/1557134478098.png)
 
 - [ ] Provide screenshot of the resulting monitoring web page.
 
-  ![1557135024207](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557135024207.png)
+  ![1557135024207](img/1557135024207.png)
 
 - [ ] Show screenshots of the test results confirming working load balancer by curling a web page <span style="color: blue">testlb.php</span> in a loop from a local computer (e.g., your laptop), which shows alternately changing the web server IP. 
+
+  ![1557147286058](img/1557147286058.png)
 
   
 

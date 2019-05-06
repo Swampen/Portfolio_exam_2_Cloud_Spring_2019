@@ -17,6 +17,10 @@ export DBProxyHostName="maxscale"
 export webServerHostName="web"
 export LBHostName="lb"
 
+################# Network parameters #################
+# Subnet parameters
+export ipSubnet="10\.10"
+
 ################# VM setup paremeters #################
 # ssh parameters
 # This is the name to be used for creation of the keypair used for authentication
@@ -33,5 +37,9 @@ export masterUser="dats06"
 export sshProxyCommand="ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR $masterUser@$masterHost -W %h:%p"
 # Locale parameter
 export userLocale="nb_NO.UTF-8"
+# Timezone parameter
+export timezone="Europe/Oslo"
+# Keyboard layout parameter
+export keyboard="no"
 
 ################# dbSetup Parameters ######################

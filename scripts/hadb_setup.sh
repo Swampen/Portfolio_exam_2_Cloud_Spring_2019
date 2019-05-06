@@ -30,13 +30,15 @@ galerahoststring=$( echo wsrep_cluster_address=gcomm://${DBHOSTNAMES[*]} | tr " 
 
 ############### SETUP COMMANDS TO BE RUN ON DB SERVERS###############
 dbSetupCommands=("
+sudo locale-gen "nb_NO.UTF-8";
 sudo apt-get update -y;
 sudo apt-get upgrade -y;
 sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8;
 sudo add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.1/ubuntu xenial main';
 sudo apt-get update -y;
-RUN DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server rsync -y;
+sudo DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server rsync -y;
 ")
+
 #export DEBIAN_FRONTEND=noninteractive;
 #sudo debconf-set-selections <<< 'mariadb-server-10.1 mysql-server/root_password password PASS';
 #sudo debconf-set-selections <<< 'mariadb-server-10.1 mysql-server/root_password_again password PASS';
@@ -45,7 +47,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server rsync -y;
 
 echo "Starting dbServer setup"
 #parallell-ssh --askpass -i -H "$DBHOSTS" -l "$USERNAME" -x "-i $sshkey -o StrictHostKeyChecking=no "  < mkdir TEST
-parallel-ssh -i  -H "$DBHOSTS" -l "$username" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "$dbSetupCommands"
+parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "$dbSetupCommands"
 
 echo "Done running parallel ssh commands"
 
