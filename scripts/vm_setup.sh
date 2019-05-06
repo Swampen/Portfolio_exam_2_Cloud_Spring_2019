@@ -45,7 +45,7 @@ openstack security group rule create \
 	--dst-port 22 \
 	--description "Allows ssh inside the cloud" \
 	--remote-group $securityGroup $securityGroup
-	
+
 openstack security group rule create \
 	--protocol tcp \
 	--dst-port 22 \
@@ -102,14 +102,14 @@ openstack security group rule create \
 # Checks if the .ssh directory exists and if it doesn't make it and gives it permissions 755
 if [ -d "$HOME/.ssh/" ]
 then
-	echo "Folder exists"	
+	echo "Folder exists"
 else
 	mkdir ~/.ssh
 	chmod 755 ~/.ssh
 fi
 
 # Creates keypair and puts it in the .ssh folder and gives it permission 400 so that no one except the owner can read it
-#openstack keypair create $KEYPAIRNAME > $KEYLOCATION
+# openstack keypair create $KEYPAIRNAME > $KEYLOCATION
 #chmod 400 $KEYLOCATION
 # Sleep to let the system get some time to register that the key has been made
 sleep 4
@@ -199,20 +199,8 @@ done
 echo "Setup complete!"
 echo "Updating VMs"
 
-#Updates and upgrades the VMs using a parallel ssh
-update=("
-sudo apt-get update -y;
-sudo apt-get upgrade -y;
-")
-parallel-ssh -i -H "${ipList[*]}" \
-        -l $username \
-	 -x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
-	"$update"
-
-o "##### Editing /etc/hosts files #####"
+# Optains the IP adresses of all the VMs
 vmnames=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}'`)
-
-ipSubnet="10\.10"
 names=()
 ipList=()
 hostfileEntry=""
@@ -224,22 +212,27 @@ for vm in ${vmnames[@]}; do
        ipList+=("$ip")
        hostfileEntry="$ip $name \\n$hostfileEntry"
 done
-echo rip
-sleep 2
 
-# sed s/dats06-db-/db/g
-# sed s/dats06-web-/web/g
-# sed s/dats06-dbproxy/maxscale/
+# Updates and upgrades the VMs using a parallel ssh
+update=("
+sudo apt-get update -y;
+sudo apt-get upgrade -y;
+")
+parallel-ssh -i -H "${ipList[*]}" \
+        -l $username \
+	 -x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
+	"$update"
 
+# Changing hostname of all the VMs to what is specified
+# in the parameter file
 for i in ${!vmnames[@]}; do
    	let n=i+1
 	echo -n "$n/${#vmnames[@]} - ${vmnames[$i]} - "
 	ip=""
 	hostname=""
-	#check=`echo "${vmnames[$i]}" | grep -E "$DBName-?[0-9]*|$DBProxyName|$LBName|$webServerName"`
 	if [[ ${vmnames[$i]} = $DBProxyName ]]; then
 		hostname=`echo ${vmnames[$i]} | sed s/$DBProxyName/$DBProxyHostName/g`
-		echo $
+		echo $hostname
 		hostfileEntry=`echo $hostfileEntry | sed s/$DBProxyName/$DBProxyHostName/g`
 		ip=${ipList[$i]}
 		ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "sudo bash -c 'echo $hostname > /etc/hostname'"
@@ -262,24 +255,23 @@ for i in ${!vmnames[@]}; do
 		ip=${ipList[$i]}
 		ssh -i $sshKeyLocation $username@$ip -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" "sudo bash -c 'echo $hostname > /etc/hostname'"
 	else
-	        echo not found
+		echo not found
 	fi
 done
 
+# The commands that will execute over paralell ssh
+# Will do an entry in the hosts file with the required hosts
+# Change locale to what's specified in the parameter file
+# Set timezone to what's specified in the parameter file
+# Set keyboard layout to what's what's specified in the parameter file
 script=("
 sudo sed -i '1 i\\$hostfileEntry' /etc/hosts;
 sudo sed -i '$ a LANGUAGE=\"$userLocale\"\nLC_ALL=\"$userLocale\"' /etc/default/locale;
 sudo unlink /etc/localtime;
-sudo ln -s /usr/share/zoneinfo/Europe/Oslo /etc/localtime;
+sudo ln -s /usr/share/zoneinfo/$timezone /etc/localtime;
 sudo locale-gen $userLocale;
-sudo sed -i s/XKBLAYOUT=.*/XKBLAYOUT=\"no\"/g /etc/default/keyboard;
+sudo sed -i s/XKBLAYOUT=.*/XKBLAYOUT=\"$keyboard\"/g /etc/default/keyboard;
 ")
-
-test=("
-echo Hello World;
-hostname;
-")
-
 parallel-ssh -i -H "${ipList[*]}" \
 	-l $username \
 	-x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
