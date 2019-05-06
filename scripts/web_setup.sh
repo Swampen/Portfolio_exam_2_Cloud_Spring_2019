@@ -88,14 +88,13 @@ fi
 # Script that get executed by the crontab command under.
 # Since we itterate over the webservers and push to each one we needed to make a script file for it.
 cd ~/
-    sudo bash -c "echo '
-    #!/bin/sh
-    cd /var/www/html
-    git pull
-    for i in 2 3
-    do
-    rsync -avz -e ssh -i dats06-key.pem /var/www/html ubuntu@web$i:/var/www/html
-    done' > rsyncScript.sh"
+    sudo bash -c "echo '#!/bin/sh
+cd /var/www/html
+git pull
+for i in 2 3
+do
+    rsync -avz -e ssh -i dats06-key.pem /var/www/html ubuntu@web\$i:/var/www/html
+done' > rsyncScript.sh"
 
 # Initial pull down from git repo
 cd /var/www/html
@@ -106,5 +105,6 @@ hs=`hostname`
 
 if [[ $hs = "web1" ]];
 then
-(crontab -l ; echo "**/3 * * * * /bin/bash /home/ubuntu/rsyncScript.sh")| crontab -
+sudo apt-get install cron
+(crontab -l ; echo "*/3 * * * * /bin/bash /home/ubuntu/rsyncScript.sh")| crontab -
 fi
