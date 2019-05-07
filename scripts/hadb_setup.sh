@@ -3,25 +3,19 @@
 # This script configures MariadB in a multi master setup configured via galeracluster.
 # The  script takes a single config file as parameter
 # DEPENDENCIES
-#	Parallel-SSH:	sudo apt-get install pssh
+# Parallel-SSH:	sudo apt-get install pssh
 
 
 # TODO: THE PARAMETER FILE IS TO BE SOURCED BY THE SETUP-SCRIPT REMOVE THIS WHEN TESTING IS COMPLETE!!!!
 PARAM_FILE=$@
 source $PARAM_FILE
 
-# Extracting dbServer host IPs from hostnames
-echo "Getting dbServer IPs"
+# Generating array of dbServer Hostnames
 for ((i = 1; i <= $numberOfDBs; i++))
 do
-	#Getting IP-address of instance
-   	#hostIP=$(openstack server show $DBName-$i | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}')
 	hostName="$DBHostName$i"
 	DBHOSTS="$DBHOSTS$hostName "
 done
-
-# Extracting MaxScale host IP from hostname
-#SCALEHOST=$(openstack server show $DBProxyName | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}')
 
 # Generating host configstring for galeraserver
 galerahoststring=$( echo wsrep_cluster_address=gcomm://${DBHOSTS[*]} | tr " " ",")
@@ -39,8 +33,14 @@ sudo apt-get update -y;
 sudo DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server rsync -y;
 ")
 
+parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "dbSetupCommands"
+
+################ WRITING CONFIG FILES ON DBSERVERS #####################
+
 for ((i = 1; i <= $numberOfDBs; i++))
 do
+
+# Generating config string for each dbServer
 dbConfigString=("
 [mysqld]
 binlog_format=ROW
@@ -64,32 +64,103 @@ wsrep_node_address="$DBHostName$i"
 wsrep_node_name="$DBHostName$i"
 ")
 
-command=("
+# Writing settings to /etc/mysql/conf.d/galera.cnf
+galeraConfCommand=("
 sudo echo '$dbConfigString' > ~/tmpfile
 sudo cp /home/ubuntu/tmpfile /etc/mysql/conf.d/galera.cnf
+sudo rm ~/tmpfile
 ")
-echo $dbConfigString
-#parallel-ssh -i -H "$DBHostName$i" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "$command"
-ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$DBHostName$i" "$command"
-exit 0
+ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$DBHostName$i" "$galeraConfCommand"
+if [[ $i = 1 ]]
+then
+	firstDB="$DBHostName$i"
+fi
 done
 
-#export DEBIAN_FRONTEND=noninteractive;
-#sudo debconf-set-selections <<< 'mariadb-server-10.1 mysql-server/root_password password PASS';
-#sudo debconf-set-selections <<< 'mariadb-server-10.1 mysql-server/root_password_again password PASS';
+# Stopping sql service on all servers
+parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl stop mysql"
 
+# Starting new cluster
+ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "sudo galera_new_cluster"
 
-echo "Starting dbServer setup"
-#parallell-ssh --askpass -i -H "$DBHOSTS" -l "$username" -x "-i $sshkey -o StrictHostKeyChecking=no "  < mkdir TEST
-parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "dbSetupCommands"
+# Commands for creating maxsclae user
+dbCommand=("
+mysql -u root -e "create user '$username'@'$DBProxyHostName' identified by 'mypwd';";
+mysql -u root -e "grant select on mysql.user to '$username'@'$DBProxyHostName';";
+mysql -u root -e "grant select on mysql.db to '$username'@'$DBProxyHostName';";
+mysql -u root -e "grant select on mysql.tables_priv to '$username'@'$DBProxyHostName';";
+mysql -u root -e "grant show databases on *.* to '$username'@'$DBProxyHostName';";
+")
 
-echo "Done running parallel ssh commands"
+# Creating maxscale user and granting permissions
+ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
-#ssh -i
-
-# Command for getting ip of instance if we know the name
-#nova list --name dbtest-1 | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'
+# Restarting mariaDB service on all servers
+parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl restart mysql"
 
 ################### SETUP COMMANDS TO BE RUN ON MAXSCALE SERVERS #####################
 
+# Installing maxscale on dbProxy Server
+ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$DBProxyHostName" "sudo apt-get -y install maxscale"
 
+for ((i = 1; i <= $numberOfDBs; i++))
+do
+	serverBlock=("[server$i]\ntype=server\naddress=$DBHostName$i\nport=3306\nprotocol=MySQLBackend\n\n")
+	serverArr="$serverArr$serverBlock"
+done
+
+maxscaleHostString=$(echo ${DBHOSTS[*]} | tr " " ",")
+
+
+proxyConfigString=("
+# Globals\n
+[maxscale]\n
+threads=4\n
+ \n
+# Servers\n
+$serverArr
+ \n
+# Monitoring for the servers\n
+[Galera Monitor]\n
+type=monitor\n
+module=galeramon\n
+servers=$maxscaleHostString\n
+user=myuser\n
+passwd=mypwd\n
+monitor_interval=1000\n
+ \n
+# Galera router service\n
+[Galera Service]\n
+type=service\n
+router=readwritesplit\n
+servers=$maxscaleHostString\n
+user=myuser\n
+passwd=mypwd\n
+ \n
+# MaxAdmin Service\n
+[MaxAdmin Service]\n
+type=service\n
+router=cli\n
+ \n
+# Galera cluster listener\n
+[Galera Listener]\n
+type=listener\n
+service=Galera Service\n
+protocol=MySQLClient\n
+port=3306\n
+ \n
+# MaxAdmin listener\n
+[MaxAdmin Listener]\n
+type=listener\n
+service=MaxAdmin Service\n
+protocol=maxscaled\n
+socket=default\n
+")
+
+proxyConfCommand=("
+sudo echo -e '$proxyConfigString' > ~/tmpfile
+sudo cp /home/ubuntu/tmpfile /etc/maxscale.cnf
+sudo rm ~/tmpfile
+")
+
+ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$DBProxyHostName" "$proxyConfCommand"
