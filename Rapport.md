@@ -60,16 +60,16 @@ The whole work is divided into different tasks listed below, which include <span
 5. A table listing the VMs with these information: VM name, hostname, IP, flavor, software you
    installed in the VM, and ports used for specific purpose(s).
 
-   | VMs            | Hostname | IP   | Flavor      | Software | Ports |
-   | -------------- | -------- | ---- | ----------- | -------- | ----- |
-   | dats06-lb      | lb       |      | m1.1GB      | HAProxy  |       |
-   | dats06-web-1   | web1     |      | m1.512MB4GB |          |       |
-   | dats06-web-2   | web2     |      | m1.512MB4GB |          |       |
-   | dats06-web-3   | web3     |      | m1.512MB4GB |          |       |
-   | dats06-db-1    | db1      |      | m1.512MB4GB |          |       |
-   | dats06-db-2    | db2      |      | m1.512MB4GB |          |       |
-   | dats06-db-3    | db3      |      | m1.512MB4GB |          |       |
-   | dats06-dbproxy | dbproxy  |      | m1.512MB4GB |          |       |
+   | VMs            | Hostname | IP   | Flavor      | Software                                                     | Ports                      |
+   | -------------- | -------- | ---- | ----------- | ------------------------------------------------------------ | -------------------------- |
+   | dats06-lb      | lb       |      | m1.1GB      | HAProxy                                                      | 22, 80                     |
+   | dats06-web-1   | web1     |      | m1.512MB4GB | Nginex<br />MariaDB-client<br />MySQL<br />php<br />Git<br />Cron | 22, 80, 3306               |
+   | dats06-web-2   | web2     |      | m1.512MB4GB | Nginex<br />MariaDB-client<br />MySQL<br />php<br />Git<br />Cron | 22, 80, 3306               |
+   | dats06-web-3   | web3     |      | m1.512MB4GB | Nginex<br />MariaDB-client<br />MySQL<br />php<br />Git<br />Cron | 22, 80, 3306               |
+   | dats06-db-1    | db1      |      | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
+   | dats06-db-2    | db2      |      | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
+   | dats06-db-3    | db3      |      | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
+   | dats06-dbproxy | dbproxy  |      | m1.512MB4GB | MaxScale                                                     | 22, 3306                   |
 
    
 
