@@ -32,12 +32,6 @@ done
 echo rip
 sleep 10
 
-# sed s/dats06-db-/db/g
-# sed s/dats06-web-/web/g
-# sed s/dats06-dbproxy/maxscale/
-
-
-
 script=("
 sudo sed -i '1 i\\$hostfileEntry' /etc/hosts;
 sudo sed -i '$ a LANGUAGE=\"$userLocale\"\nLC_ALL=\"$userLocale\"' /etc/default/locale;
