@@ -1,9 +1,35 @@
 #! /bin/bash
 
+webServers=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}' | grep $webServerName`)
+ipList=()
+webNames=()
+for i in ${!webServers[@]}; do
+    ip=$(openstack server show ${webServers[$i]} | grep -o "$ipSubnet\.[0-9]\{1,3\}\.[0-9]\{1,3\}")
+    ipList+=("$ip")
+    webNames+=("$webServerHostName$i")
+done
 
-#Hostname File
+# All commands that will be executed over paralell ssh
+commands=("
+sudo apt install nginx -y;
+sudo systemctl start nginx.service;
+sudo apt-get install mariadb-client;
+sudo apt get install crontab;
+sudo systemctl start mysql.service;
+sudo mysql_secure_installation;
+sudo adduser ubuntu www-data;
+sudo chown -R www-data:www-data /var/www;
+sudo chmod -R g+rw /var/www;
+sudo apt-get install php-fpm -y;
+sudo apt install git-all
+") # Is apt install git-all correct??
 
-#! installation off nginx
+parallel-ssh -i -H "${ipList[*]}" \
+        -l $username \
+        -x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
+        "$commands"
+
+# installation off nginx
 sudo apt update
 sudo apt install nginx -y
 
@@ -50,11 +76,10 @@ sudo bash -c "echo 'server {
     listen 80 default_server;
     listen [::]:80 default_server;
 
-    root /var/www/html/Portfolio_exam_deployment;
-    index index.php index.html index.htm index.nginx-debian.html;
+    root /var/www/html;
+    index index.php test.php index.html index.htm index.nginx-debian.html;
 
-                # Need to be changed dynamically by the script
-    server_name server_name_or_IP;
+    server_name PLACEHOLDER;
 
     location / {
         try_files $uri $uri/ =404;
@@ -70,38 +95,58 @@ sudo bash -c "echo 'server {
     }
 }' > /etc/nginx/sites-available/default"
 
-# Reboot to activate config
-sudo service nginx restart
+
+# Template for nginx config with a placeholer
+nginxTemplate="echo 'server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.php test.php index.html index.htm index.nginx-debian.html;
+
+    server_name PLACEHOLDER;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}' > /etc/nginx/sites-available/default"
+nginxConfig=()
+for i in "${webNames[@]}"; do
+    nginxConfig+=(`echo $configTemplate | sed "s/PLACEHOLDER/$i/g"`)
+done
 
 
-hs=`hostname`
 
-if [[ $hs = "web1" ]];
-then
+ssh -i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand' $username@
 
-    #Going to production directory
-    cd /var/www/html
-        #git init and pulling down the files used in this project
-        git clone https://github.com/JakobSimonsen/Portfolio_exam_deployment.git
-        
+for vm in ${webServers[@]}; do
+    openstack server reboot --wait $vm
+done
 
-fi
+#### Still figuring out how to make separate configs for the different webservers
+# Will be inited separatply over ssh/scp maybe?
 
 # Script that get executed by the crontab command under.
 # Since we itterate over the webservers and push to each one we needed to make a script file for it.
-cd ~/
-    sudo bash -c "echo '
-    #!/bin/sh
-    cd /var/www/html/Portfolio_exam_deployment
-    git pull
-    for i in 2 3
-    do
-    rsync -avz -e ssh -i dats06-key.pem /var/www/html ubuntu@web$i:/var/www/html
-    done' > rsyncScript.sh"
 
-# Initial pull down from git repo
-cd /var/www/html/Portfolio_exam_deployment
-    git pull
-
-*/3 * * * * ~/rsyncScript.sh
-
+# Do all this on web1
+sudo bash -c "echo '#!/bin/sh
+cd /var/www/html
+git pull
+for i in 2 3; do
+    rsync -avz -e ssh -i dats06-key.pem /var/www/html ubuntu@$webServerHostName$i:/var/www/html
+done' > rsyncScript.sh"
+git clone https://github.com/JakobSimonsen/Portfolio_exam_deployment.git /var/www/html
+if [[ $hs = "web1" ]]; then
+    sudo apt-get install cron
+    (crontab -l ; echo "*/3 * * * * /bin/bash /home/ubuntu/rsyncScript.sh") | crontab -
+fi

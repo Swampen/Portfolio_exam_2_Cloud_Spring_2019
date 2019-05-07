@@ -7,7 +7,7 @@ https://ansatt.oslomet.no/vpn-koble-filserver
 *This is the second portfolio exam which must be done and delivered in a group. This contributes 50% for your final grade.* 
 In this work, you will setup a cloud-based application architecture using LEMP stack in OpenStack (ALTO). It has a load balancer, three web servers, a database proxy and three database servers as shown in the figure below.
 
-![1554978491544](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1554978491544.png)
+![1554978491544](img/1554978491544.png)
 
 ------
 
@@ -36,40 +36,40 @@ The whole work is divided into different tasks listed below, which include <span
 
    Security groups:
 
-   ![1557132863439](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557132863439.png)
+   ![1557132863439](img/1557132863439.png)
 
    Rules of dats06-security:
 
-   ![1557133121691](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557133121691.png)
+   ![1557133121691](img/1557133121691.png)
 
    Keypairs:
 
-   ![1557133197127](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557133197127.png)
+   ![1557133197127](img/1557133197127.png)
 
 3. A screenshot of the list of VMs created.
 
-    ![1557133367555](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557133367555.png)
+    ![1557133367555](img/1557133367555.png)
 
 4. A screenshot of the host names defined in /etc/hosts of one of the servers (say, datsXX-lb). Give short hostnames to the servers here, such as lb, web1, web2, web3, db1, db2, db3, and
    maxscale and use names in all the configurations instead of hard coded IPs.
 
    Load balancer's hosts file
 
-   ![1557133775942](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557133775942.png)
+   ![1557133775942](img/1557133775942.png)
 
 5. A table listing the VMs with these information: VM name, hostname, IP, flavor, software you
    installed in the VM, and ports used for specific purpose(s).
 
-   | VMs            | Hostname | IP   | Flavor      | Software | Ports |
-   | -------------- | -------- | ---- | ----------- | -------- | ----- |
-   | dats06-lb      | lb       |      | m1.1GB      |          |       |
-   | dats06-web-1   | web1     |      | m1.512MB4GB |          |       |
-   | dats06-web-2   | web2     |      | m1.512MB4GB |          |       |
-   | dats06-web-3   | web3     |      | m1.512MB4GB |          |       |
-   | dats06-db-1    | db1      |      | m1.512MB4GB |          |       |
-   | dats06-db-2    | db2      |      | m1.512MB4GB |          |       |
-   | dats06-db-3    | db3      |      | m1.512MB4GB |          |       |
-   | dats06-dbproxy | dbproxy  |      | m1.512MB4GB |          |       |
+   | VMs            | Hostname | IP   | Flavor      | Software                                                     | Ports                      |
+   | -------------- | -------- | ---- | ----------- | ------------------------------------------------------------ | -------------------------- |
+   | dats06-lb      | lb       |      | m1.1GB      | HAProxy                                                      | 22, 80                     |
+   | dats06-web-1   | web1     |      | m1.512MB4GB | Nginex<br />MariaDB-client<br />MySQL<br />php<br />Git<br />Cron | 22, 80, 3306               |
+   | dats06-web-2   | web2     |      | m1.512MB4GB | Nginex<br />MariaDB-client<br />MySQL<br />php<br />Git<br />Cron | 22, 80, 3306               |
+   | dats06-web-3   | web3     |      | m1.512MB4GB | Nginex<br />MariaDB-client<br />MySQL<br />php<br />Git<br />Cron | 22, 80, 3306               |
+   | dats06-db-1    | db1      |      | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
+   | dats06-db-2    | db2      |      | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
+   | dats06-db-3    | db3      |      | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
+   | dats06-dbproxy | dbproxy  |      | m1.512MB4GB | MaxScale                                                     | 22, 3306                   |
 
    
 
@@ -79,15 +79,17 @@ The whole work is divided into different tasks listed below, which include <span
 
   HAproxy config
 
-  ![1557134437526](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557134437526.png)
+  ![1557134437526](img/1557134437526.png)
 
-  ![1557134478098](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557134478098.png)
+  ![1557134478098](img/1557134478098.png)
 
 - [ ] Provide screenshot of the resulting monitoring web page.
 
-  ![1557135024207](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557135024207.png)
+  ![1557135024207](img/1557135024207.png)
 
 - [ ] Show screenshots of the test results confirming working load balancer by curling a web page <span style="color: blue">testlb.php</span> in a loop from a local computer (e.g., your laptop), which shows alternately changing the web server IP. 
+
+  ![1557147286058](img/1557147286058.png)
 
   
 
