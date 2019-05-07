@@ -4,7 +4,6 @@ WebOK=false
 DBPOK=false
 DBOK=false
 SecGrExist=false
-SecGrLBExist=false
 
 # Creates an array of all existing security groups
 Securitygroups=`openstack security group list --c Name | awk '!/^$|Name/ {print $2;}'`
@@ -19,23 +18,12 @@ do
 	fi
 done
 
-for x in $Securitygroups
-do
-	if [[ $x = $securityGroupLB ]]
-	then
-		SecGrExistLB=true
-	fi
-done
 # Creates the security group if it doesn't exist
 if [[ $SecGrExist = false ]]
 then
 	openstack security group create $securityGroup
 fi
 
-if [[ $SecGrLBExist = false ]]
-then
-	openstack security group create $securityGroupLB
-fi
 # sleeps for a little while so that the script will register that the SecGroup has been made
 sleep 4
 # Adds appropriate rules to the security group
@@ -87,19 +75,6 @@ openstack security group rule create \
 	--protocol tcp \
 	--description "Allows Incremental State Transfer" \
 	--dst-port 4568 \
-	--remote-group $securityGroup $securityGroup
-
-# Permits Munin to run for monitoring purposes
-openstack security group rule create \
-	--protocol tcp
-	--description "Allows Munin" \
-	--dst-port 4949
-	--remote-ip  0.0.0.0/0 $securityGroup
-
-openstack security group rule create \
-	--protocol tcp \
-	--description "Allows Munin" \
-	--dst-port 4949 \
 	--remote-group $securityGroup $securityGroup
 
 # Checks if the .ssh directory exists and if it doesn't make it and gives it permissions 755
