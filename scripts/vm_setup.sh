@@ -4,7 +4,6 @@ WebOK=false
 DBPOK=false
 DBOK=false
 SecGrExist=false
-SecGrLBExist=false
 
 # Creates an array of all existing security groups
 Securitygroups=`openstack security group list --c Name | awk '!/^$|Name/ {print $2;}'`
@@ -19,23 +18,12 @@ do
 	fi
 done
 
-for x in $Securitygroups
-do
-	if [[ $x = $securityGroupLB ]]
-	then
-		SecGrExistLB=true
-	fi
-done
 # Creates the security group if it doesn't exist
 if [[ $SecGrExist = false ]]
 then
 	openstack security group create $securityGroup
 fi
 
-if [[ $SecGrLBExist = false ]]
-then
-	openstack security group create $securityGroupLB
-fi
 # sleeps for a little while so that the script will register that the SecGroup has been made
 sleep 4
 # Adds appropriate rules to the security group
@@ -60,46 +48,31 @@ openstack security group rule create \
 	--description "Allows HTTP access from the outside" \
 	--dst-port 80 $securityGroup
 
-openstack security group rule create \
-	--protocol tcp \
-	--remote-ip 0.0.0.0/0 \
-	--description "Allows HTTP access from the outside" \
-	--dst-port 80 $securityGroupLB
 # Permits MySQL client connection
 openstack security group rule create --protocol tcp \
 	--dst-port 3306 \
 	--description "Allows a MySQL client connection" \
 	--remote-group $securityGroup $securityGroup
+
 # Permits State Snapshot Transfer (SST)
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows State Snapshot Transfer" \
 	--dst-port 4444 \
 	--remote-group $securityGroup $securityGroup
+
 # Permits Galera cluster replication traffic
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows Galera cluster replication traffic" \
 	--dst-port 4567 \
 	--remote-group $securityGroup $securityGroup
+
 # Permits Incremental State Transfer (IST)
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows Incremental State Transfer" \
 	--dst-port 4568 \
-	--remote-group $securityGroup $securityGroup
-
-# Permits Munin to run for monitoring purposes
-openstack security group rule create \
-	--protocol tcp
-	--description "Allows Munin" \
-	--dst-port 4949
-	--remote-ip  0.0.0.0/0 $securityGroup
-
-openstack security group rule create \
-	--protocol tcp \
-	--description "Allows Munin" \
-	--dst-port 4949 \
 	--remote-group $securityGroup $securityGroup
 
 # Checks if the .ssh directory exists and if it doesn't make it and gives it permissions 755
