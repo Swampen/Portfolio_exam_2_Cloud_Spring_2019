@@ -11,6 +11,7 @@ PARAM_FILE=$@
 source $PARAM_FILE
 
 # Generating array of dbServer Hostnames
+echo "Generating hostname array"
 for ((i = 1; i <= $numberOfDBs; i++))
 do
 	hostName="$DBHostName$i"
@@ -18,25 +19,24 @@ do
 done
 
 # Generating host configstring for galeraserver
+echo "Generating galera configstring"
 galerahoststring=$( echo wsrep_cluster_address=gcomm://${DBHOSTS[*]} | tr " " ",")
 
 
 ############### SETUP COMMANDS TO BE RUN ON DB SERVERS###############
 
 dbSetupCommands=("
-sudo locale-gen "nb_NO.UTF-8";
-sudo apt-get update -y;
-sudo apt-get upgrade -y;
 sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8;
 sudo add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.1/ubuntu xenial main';
 sudo apt-get update -y;
 sudo DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server rsync -y;
 ")
-
-parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "dbSetupCommands"
+echo "Paralell ssh mariadb setup"
+parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "$dbSetupCommands"
 
 ################ WRITING CONFIG FILES ON DBSERVERS #####################
 
+echo "Generating configstrings for dbServers"
 for ((i = 1; i <= $numberOfDBs; i++))
 do
 
@@ -70,6 +70,8 @@ sudo echo '$dbConfigString' > ~/tmpfile
 sudo cp /home/ubuntu/tmpfile /etc/mysql/conf.d/galera.cnf
 sudo rm ~/tmpfile
 ")
+
+echo "Writing settings to all servers"
 ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$DBHostName$i" "$galeraConfCommand"
 if [[ $i = 1 ]]
 then
@@ -78,7 +80,7 @@ fi
 done
 
 # Stopping sql service on all servers
-parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl stop mysql"
+parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl stop mysql"
 
 # Starting new cluster
 ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "sudo galera_new_cluster"
