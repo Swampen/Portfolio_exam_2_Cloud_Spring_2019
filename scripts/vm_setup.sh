@@ -48,28 +48,26 @@ openstack security group rule create \
 	--description "Allows HTTP access from the outside" \
 	--dst-port 80 $securityGroup
 
-openstack security group rule create \
-	--protocol tcp \
-	--remote-ip 0.0.0.0/0 \
-	--description "Allows HTTP access from the outside" \
-	--dst-port 80 $securityGroupLB
 # Permits MySQL client connection
 openstack security group rule create --protocol tcp \
 	--dst-port 3306 \
 	--description "Allows a MySQL client connection" \
 	--remote-group $securityGroup $securityGroup
+
 # Permits State Snapshot Transfer (SST)
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows State Snapshot Transfer" \
 	--dst-port 4444 \
 	--remote-group $securityGroup $securityGroup
+
 # Permits Galera cluster replication traffic
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows Galera cluster replication traffic" \
 	--dst-port 4567 \
 	--remote-group $securityGroup $securityGroup
+
 # Permits Incremental State Transfer (IST)
 openstack security group rule create \
 	--protocol tcp \
