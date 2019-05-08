@@ -223,7 +223,7 @@ update=("
 sudo apt-get update -y;
 sudo apt-get upgrade -y;
 ")
-parallel-ssh -i -H "${ipList[*]}" \
+parallel-ssh -t 600 -i -H "${ipList[*]}" \
         -l $username \
 	 -x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
 	"$update"
