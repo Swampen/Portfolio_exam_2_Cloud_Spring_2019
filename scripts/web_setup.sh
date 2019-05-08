@@ -22,13 +22,14 @@ sudo chown -R www-data:www-data /var/www;
 sudo chmod -R g+rw /var/www;
 sudo apt-get install php-fpm -y;
 sudo apt install git-all
-") # Is apt install git-all correct??
+") # Is apt install git-all correct?? yas
 
 parallel-ssh -i -H "${ipList[*]}" \
         -l $username \
         -x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
         "$commands"
 
+echo "'$sshKeyLocation'"
 # installation off nginx
 sudo apt update
 sudo apt install nginx -y
@@ -76,6 +77,43 @@ sudo apt install git-all
 
 
 # Template for nginx config with a placeholer
+<<<<<<< HEAD
+nginxTemplate="echo 'server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    root /var/www/html;
+    index index.php test.php index.html index.htm index.nginx-debian.html;
+
+    server_name PLACEHOLDER;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}' > /etc/nginx/sites-available/default"
+
+# Replacing server_name in the nginx config file with looking up how maney web servers that is running and tha itterating over them.
+# Constrain: will only work if all the web servers have the same name just with a integer increment after.
+nginxConfig=()
+for i in "${webNames[@]}"; do
+    echo "kom hit 123"
+    nginxConfig+=(`echo $configTemplate | sed "s/PLACEHOLDER/$i/g"`)
+done
+
+
+echo "kom hit 12345t678"
+ssh -i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand' $username@
+
+=======
 nginxTemplate="server {
 \t    listen 80 default_server;\n
 \t    listen [::]:80 default_server;\n
@@ -104,6 +142,7 @@ for i in ${!webNames[@]}; do
     ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@${ipList[$i]} "sudo bash -c 'echo \"$nginxConfig\" > /etc/nginx/sites-available/default';"
 done
 
+>>>>>>> 34a8f604fcfa389a227e1f56d38d59f3e89fda84
 for vm in ${webServers[@]}; do
     openstack server reboot --wait $vm
 done
@@ -115,14 +154,16 @@ done
 # Since we itterate over the webservers and push to each one we needed to make a script file for it.
 
 # Do all this on web1
-sudo bash -c "echo '#!/bin/sh
-cd /var/www/html
-git pull
-for i in 2 3; do
-    rsync -avz -e ssh -i dats06-key.pem /var/www/html ubuntu@$webServerHostName$i:/var/www/html
-done' > rsyncScript.sh"
-git clone https://github.com/JakobSimonsen/Portfolio_exam_deployment.git /var/www/html
 if [[ $hs = "web1" ]]; then
+    sudo bash -c "echo '
+        #!/bin/sh
+        cd /var/www/html
+        git pull
+        for i in 2 3; do
+            rsync -avz -e ssh -i dats06-key.pem /var/www/html ubuntu@$webServerHostName$i:/var/www/html
+        done' > rsyncScript.sh"
+    git clone https://github.com/JakobSimonsen/Portfolio_exam_deployment.git /var/www/html
+#if [[ $hs = "web1" ]]; then
     sudo apt-get install cron
-    (crontab -l ; echo "*/3 * * * * /bin/bash /home/ubuntu/rsyncScript.sh") | crontab -
+    (crontab -l ; echo "*/3 * * * * /bin/sh /home/ubuntu/rsyncScript.sh") | crontab -
 fi

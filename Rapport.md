@@ -120,6 +120,20 @@ parameters for all the scripts. Describe each script file briefly in the report 
 
 Script files should be **well documented with appropriate comments.**
 
+**Decisions:** Explanation for the various decisions we have made throughout the project
+
+- Keygen: We have decided to not create a new key since our load balancer, because it is never deleted, will have the dats06-key.pem key that existed before we ran the script. Therefore we continue using this key for any subsequent virtual machines we create in the scripts. If we were to make a key we would do it like this:
+
+  ```bash
+  # Creates keypair and puts it in the .ssh folder and gives it permission 400 so that no one except the owner can read it
+  openstack keypair create $KEYPAIRNAME > $KEYLOCATION
+  chmod 400 $KEYLOCATION
+  ```
+
+  This creates the key on the ALTO cloud and redirects it into a file on your computer and gives it proper permissions
+
+- Security group: We, for this assignment, have only made a single security group, however we see that there is a possibility to have a second security group since the load balancer, for example, does not need any access to MySQL or the galera cluster. We think this will 
+
 **Group work details**: Provide following details on your group work.
 
 - [ ] How you worked as a team [How often did you meet, how tasks were distributed among your group members, whether you managed to make everyone participate and known about all the tasks (not just what s/he did), etc.].
