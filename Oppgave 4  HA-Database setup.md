@@ -144,11 +144,11 @@ mysql -u root;
 ```
 
 ```mysql
-create user 'ubuntu'@'dbproxy' identified by 'mypwd';
-grant select on mysql.user to 'ubuntu'@'dbproxy';
-grant select on mysql.db to 'ubuntu'@'dbproxy';
-grant select on mysql.tables_priv to 'ubuntu'@'dbproxy';
-grant show databases on *.* to 'ubuntu'@'dbproxy';
+create user 'ubuntu'@'maxscale' identified by 'mypwd';
+grant select on mysql.user to 'ubuntu'@'maxscale';
+grant select on mysql.db to 'ubuntu'@'maxscale';
+grant select on mysql.tables_priv to 'ubuntu'@'maxscale';
+grant show databases on *.* to 'ubuntu'@'maxscale';
 ```
 
 
