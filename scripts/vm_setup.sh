@@ -25,7 +25,9 @@ then
 fi
 
 # sleeps for a little while so that the script will register that the SecGroup has been made
+# Otherwise the script will throw an error because it can't find a security group with that name
 sleep 4
+
 # Adds appropriate rules to the security group
 # Permitting ssh internally
 openstack security group rule create \
@@ -76,13 +78,13 @@ openstack security group rule create \
 	--remote-group $securityGroup $securityGroup
 
 # Checks if the .ssh directory exists and if it doesn't make it and gives it permissions 755
-if [ -d "$HOME/.ssh/" ]
-then
-	echo "Folder exists"
-else
-	mkdir ~/.ssh
-	chmod 755 ~/.ssh
-fi
+#if [ -d "$HOME/.ssh/" ]
+#then
+#	echo "Folder exists"
+#else
+#	mkdir ~/.ssh
+#	chmod 755 ~/.ssh
+#fi
 
 # Creates keypair and puts it in the .ssh folder and gives it permission 400 so that no one except the owner can read it
 # openstack keypair create $KEYPAIRNAME > $KEYLOCATION
@@ -143,17 +145,15 @@ do
 		DBPOK=true
 	fi
 
-	# Goes through the list and deletes the VMs that are not running correctly so that they can be relaunched, if not then set the corresponding boolean to true
+	# Goes through the list and deletes the VMs that are not running correctly
+	# so that they can be relaunched, if not then set the corresponding boolean to true
+	# Warning: This only works because when you launch say 3 Databases at once, if one
+	# gets an error all 3 gets an error
 	for i in $failed
 	do
-		if [[ $i =~ ($DBName-)([1-9]) ]]
-		then
-			echo "Deleting Databases ..."
-			openstack server delete --wait $i
-		else
-			DBOK=true
-		fi
 
+		# If i corresponds with the web server name with a - and a number at the end
+		# delete said server, if i does not match then set corresponding boolean to true
 		if [[ $i =~ ($webServerName-)([1-9]) ]]
 		then
 			echo "Deleting Web Servers ..."
@@ -161,13 +161,25 @@ do
 		else
 			WebOK=true
 		fi
-
+		
+		# If i corresponds with the database proxy name 
+		# delete said server, if i does not match then set corresponding boolean to true
 		if [[ $i = "$DBProxyName" ]]
 		then
 			echo "Deleting Database Proxy ..."
 			openstack server delete --wait $i
 		else
 			DBPOK=true
+		fi
+	
+		# If i corresponds with the database name with a - and a number at the end
+		# delete said server, if i does not match then set corresponding boolean to true
+		if [[ $i =~ ($DBName-)([1-9]) ]]
+		then
+			echo "Deleting Databases ..."
+			openstack server delete --wait $i
+		else
+			DBOK=true
 		fi
 	done
 
@@ -181,28 +193,29 @@ names=()
 ipList=()
 hostsfileEntry=""
 for vm in ${vmnames[@]}; do
-       name=$vm
-       echo -n "Getting IP for $name: "
-			 # Optaining the IP of the current vm in the loop
-       ip=$(openstack server show $name | grep -o "$ipSubnet\.[0-9]\{1,3\}\.[0-9]\{1,3\}")
-       echo "$ip"
-			 # Adding the IP address to the list
-       ipList+=("$ip")
-			 name2=""
-			 # In these if statements, the program generates the "simplified" name to each VM
-      if [[ $name = $DBProxyName ]]; then
-          name2=`echo $name | sed s/$DBProxyName/$DBProxyHostName/g`
-      elif [[ $name =~ $DBName-[0-9]* ]]; then
-          name2=`echo $name | sed -E s/$DBName-/$DBHostName/g`
-      elif [[ $name =~ $webServerName-[0-9]* ]]; then
-          name2=`echo $name | sed -E s/$webServerName-/$webServerHostName/g`
-      elif [[ $name = $LBName ]]; then
-          name2=`echo $name | sed s/$LBName/$LBHostName/g`
-      else
-          echo not found
-      fi
-			# Adding the entry for the vm to the hostsfile entry
-      hostsfileEntry="$ip $name $name2 \\n$hostsfileEntry"
+	name=$vm
+	echo -n "Getting IP for $name: "
+	# Obtaining the IP of the current vm in the loop
+	ip=$(openstack server show $name | grep -o "$ipSubnet\.[0-9]\{1,3\}\.[0-9]\{1,3\}")
+	echo "$ip"
+	# Adding the IP address to the list
+	ipList+=("$ip")
+	name2=""
+	# In these if statements, the program generates the "simplified" name to each VM
+	if [[ $name = $DBProxyName ]]; then
+        	name2=`echo $name | sed s/$DBProxyName/$DBProxyHostName/g`
+	elif [[ $name =~ $DBName-[0-9]* ]]; then
+        	name2=`echo $name | sed -E s/$DBName-/$DBHostName/g`
+	elif [[ $name =~ $webServerName-[0-9]* ]]; then
+        	name2=`echo $name | sed -E s/$webServerName-/$webServerHostName/g`
+	elif [[ $name = $LBName ]]; then
+        	name2=`echo $name | sed s/$LBName/$LBHostName/g`
+	else
+        	echo not found
+	fi
+
+	# Adding the entry for the vm to the hostsfile entry
+	hostsfileEntry="$ip $name $name2 \\n$hostsfileEntry"
 done
 
 # Updates and upgrades the VMs using a parallel ssh
