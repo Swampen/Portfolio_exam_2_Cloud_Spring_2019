@@ -48,28 +48,26 @@ openstack security group rule create \
 	--description "Allows HTTP access from the outside" \
 	--dst-port 80 $securityGroup
 
-openstack security group rule create \
-	--protocol tcp \
-	--remote-ip 0.0.0.0/0 \
-	--description "Allows HTTP access from the outside" \
-	--dst-port 80 $securityGroupLB
 # Permits MySQL client connection
 openstack security group rule create --protocol tcp \
 	--dst-port 3306 \
 	--description "Allows a MySQL client connection" \
 	--remote-group $securityGroup $securityGroup
+
 # Permits State Snapshot Transfer (SST)
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows State Snapshot Transfer" \
 	--dst-port 4444 \
 	--remote-group $securityGroup $securityGroup
+
 # Permits Galera cluster replication traffic
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows Galera cluster replication traffic" \
 	--dst-port 4567 \
 	--remote-group $securityGroup $securityGroup
+
 # Permits Incremental State Transfer (IST)
 openstack security group rule create \
 	--protocol tcp \
@@ -177,18 +175,21 @@ done
 echo "Setup complete!"
 echo "Updating VMs"
 
-# Optains the IP adresses of all the VMs
+# Optains the name of all the VMs
 vmnames=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}'`)
 names=()
 ipList=()
-hostfileEntry=""
+hostsfileEntry=""
 for vm in ${vmnames[@]}; do
        name=$vm
        echo -n "Getting IP for $name: "
+			 # Optaining the IP of the current vm in the loop
        ip=$(openstack server show $name | grep -o "$ipSubnet\.[0-9]\{1,3\}\.[0-9]\{1,3\}")
        echo "$ip"
+			 # Adding the IP address to the list
        ipList+=("$ip")
-       name2=""
+			 name2=""
+			 # In these if statements, the program generates the "simplified" name to each VM
       if [[ $name = $DBProxyName ]]; then
           name2=`echo $name | sed s/$DBProxyName/$DBProxyHostName/g`
       elif [[ $name =~ $DBName-[0-9]* ]]; then
@@ -200,7 +201,8 @@ for vm in ${vmnames[@]}; do
       else
           echo not found
       fi
-      hostfileEntry="$ip $name $name2 \\n$hostfileEntry"
+			# Adding the entry for the vm to the hostsfile entry
+      hostsfileEntry="$ip $name $name2 \\n$hostsfileEntry"
 done
 
 # Updates and upgrades the VMs using a parallel ssh
@@ -219,22 +221,22 @@ parallel-ssh -i -H "${ipList[*]}" \
 # Set timezone to what's specified in the parameter file
 # Set keyboard layout to what's what's specified in the parameter file
 script=("
-sudo sed -i '1 i\\$hostfileEntry' /etc/hosts;
+sudo sed -i '1 i\\$hostsfileEntry' /etc/hosts;
 sudo sed -i '$ a LANGUAGE=\"$userLocale\"\nLC_ALL=\"$userLocale\"' /etc/default/locale;
 sudo unlink /etc/localtime;
 sudo ln -s /usr/share/zoneinfo/$timezone /etc/localtime;
 sudo locale-gen $userLocale;
 sudo sed -i s/XKBLAYOUT=.*/XKBLAYOUT=\"$keyboard\"/g /etc/default/keyboard;
 ")
+# Executing all of the commands over parallel-ssh
 parallel-ssh -i -H "${ipList[*]}" \
 	-l $username \
 	-x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
 	"$script"
 
+# Rebooting all the VMs
 echo "Rebooting the VMs"
-
 for i in ${!vmnames[@]}; do
-
 	let n=i+1
 	echo -n "$n/${#vmnames[@]} - rebooting ${vmnames[$i]} - "
 	openstack server reboot --wait ${vmnames[$i]}

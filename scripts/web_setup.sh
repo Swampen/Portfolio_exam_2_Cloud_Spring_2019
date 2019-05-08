@@ -3,10 +3,10 @@
 webServers=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}' | grep $webServerName`)
 ipList=()
 webNames=()
-for i in ${!webServers[@]}; do
-    ip=$(openstack server show ${webServers[$i]} | grep -o "$ipSubnet\.[0-9]\{1,3\}\.[0-9]\{1,3\}")
+for vm in ${webServers[@]}; do
+    ip=$(openstack server show $vm | grep -o "$ipSubnet\.[0-9]\{1,3\}\.[0-9]\{1,3\}")
     ipList+=("$ip")
-    webNames+=("$webServerHostName$i")
+    webNames+=(`echo $vm | sed -E s/$webServerName-/$webServerHostName/g`)
 done
 
 # All commands that will be executed over paralell ssh
@@ -73,31 +73,11 @@ sudo apt install git-all
 
 
 # nginx config for php init
-sudo bash -c "echo 'server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
 
-    root /var/www/html;
-    index index.php test.php index.html index.htm index.nginx-debian.html;
-
-    server_name PLACEHOLDER;
-
-    location / {
-        try_files $uri $uri/ =404;
-    }
-
-    location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php7.0-fpm.sock;
-    }
-
-    location ~ /\.ht {
-        deny all;
-    }
-}' > /etc/nginx/sites-available/default"
 
 
 # Template for nginx config with a placeholer
+<<<<<<< HEAD
 nginxTemplate="echo 'server {
     listen 80 default_server;
     listen [::]:80 default_server;
@@ -133,6 +113,36 @@ done
 echo "kom hit 12345t678"
 ssh -i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand' $username@
 
+=======
+nginxTemplate="server {
+\t    listen 80 default_server;\n
+\t    listen [::]:80 default_server;\n
+\n
+\t    root /var/www/html;\n
+\t    index index.php test.php index.html index.htm index.nginx-debian.html;\n
+\n
+\t    server_name PLACEHOLDER;\n
+\n
+\t    location / {\n
+\t\t        try_files $uri $uri/ =404;\n
+\t    }\n
+\n
+\t    location ~ \.php$ {\n
+\t\t        include snippets/fastcgi-php.conf;\n
+\t\t        fastcgi_pass unix:/run/php/php7.0-fpm.sock;\n
+\t    }\n
+\n
+\t    location ~ /\.ht {\n
+\t\t        deny all;\n
+\t    }\n
+}\n"
+
+for i in ${!webNames[@]}; do
+    nginxConfig=`cat config/nginxConfig.txt | sed "s/PLACEHOLDER/${webNames[$i]}/g"`
+    ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@${ipList[$i]} "sudo bash -c 'echo \"$nginxConfig\" > /etc/nginx/sites-available/default';"
+done
+
+>>>>>>> 34a8f604fcfa389a227e1f56d38d59f3e89fda84
 for vm in ${webServers[@]}; do
     openstack server reboot --wait $vm
 done

@@ -51,7 +51,6 @@ sudo nano /etc/mysql/conf.d/galera.cnf
 Next we append the following lines to the file:
 
 ```bash
-
 [mysqld]
 binlog_format=ROW
 default-storage-engine=innodb
@@ -245,7 +244,7 @@ sudo systemctl start maxscale.service
 
 Then we confirm everything running as expected:
 
-![1557150736721](/home/fredrik/Documents/HIOA/Cloud/Portfolio_exam_2_Cloud/img/1557150736721.png)
+![1557222569790](/home/fredrik/Documents/HIOA/Cloud/Portfolio_exam_2_Cloud/img/1557222569790.png)
 
 To check change of  master role, we disable server 1 by running the following command on db1:
 
@@ -259,7 +258,7 @@ Next we run the following command on dbproxy and observe the result:
 maxadmin list servers
 ```
 
-![1557151047477](/home/fredrik/Documents/HIOA/Cloud/Portfolio_exam_2_Cloud/img/1557151047477.png)
+![1557222686770](/home/fredrik/Documents/HIOA/Cloud/Portfolio_exam_2_Cloud/img/1557222686770.png)
 
 
 
