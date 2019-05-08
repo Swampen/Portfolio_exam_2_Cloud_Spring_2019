@@ -87,19 +87,12 @@ do
 
 	if [[ ${dbNames[$i]} = $DBHostName"1" ]]
 	then
-		firstDB="${dbNames[$i]}
+		firstDB="${ipList[$i]}
 	fi
 	done
 
-
-
-
-
-
-
-
 # Stopping sql service on all servers
-parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl stop mysql"
+parallel-ssh -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl stop mysql"
 
 # Starting new cluster
 echo "Initializing new galera cluster on $firstDB"
@@ -107,7 +100,7 @@ ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB"
 
 # Starting service on remaining servers
 echo starting galera service on remaining servers
-parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl start mysql"
+parallel-ssh -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl start mysql"
 
 
 # Commands for creating maxsclae user
@@ -119,6 +112,8 @@ parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $sshKeyLocation -o StrictHos
 #mysql -u root -e "grant show databases on *.* to '$username'@'$DBProxyHostName';";
 #")
 
+
+exit 0
 # Creating maxscale user and granting permissions
 ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
