@@ -1,4 +1,8 @@
 #! /bin/bash
+
+# Installs parallel-ssh
+sudo apt-get install pssh -y
+
 # Assigning "booleans"
 WebOK=false
 DBPOK=false
@@ -76,21 +80,6 @@ openstack security group rule create \
 	--description "Allows Incremental State Transfer" \
 	--dst-port 4568 \
 	--remote-group $securityGroup $securityGroup
-
-# Checks if the .ssh directory exists and if it doesn't make it and gives it permissions 755
-#if [ -d "$HOME/.ssh/" ]
-#then
-#	echo "Folder exists"
-#else
-#	mkdir ~/.ssh
-#	chmod 755 ~/.ssh
-#fi
-
-# Creates keypair and puts it in the .ssh folder and gives it permission 400 so that no one except the owner can read it
-# openstack keypair create $KEYPAIRNAME > $KEYLOCATION
-#chmod 400 $KEYLOCATION
-# Sleep to let the system get some time to register that the key has been made
-sleep 4
 
 # While loop which checks if the web servers, databases and database proxy are up and running correctly
 while [[ $WebOK = false ]] || [[ $DBPOK = false ]] || [[ $DBOK = false ]]
@@ -223,7 +212,7 @@ update=("
 sudo apt-get update -y;
 sudo apt-get upgrade -y;
 ")
-parallel-ssh -i -H "${ipList[*]}" \
+parallel-ssh -t 600 -i -H "${ipList[*]}" \
         -l $username \
 	 -x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
 	"$update"
