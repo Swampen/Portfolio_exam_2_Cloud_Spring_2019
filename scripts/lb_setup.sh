@@ -1,7 +1,6 @@
 #! /bin/bash
 
 webServers=()
-
 webs=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}' | grep $webServerName | sed s/$webServerName-/$webServerHostName/g`)
 HAProxyEntry=""
 for i in ${!webs[@]}; do
@@ -33,11 +32,3 @@ backend web-backend
     stats realm Haproxy\ Statistics
     stats auth dats06:\"thrown similar river\"'
 ")
-
-# sudo apt-get install -y apache2 munin
-# sudo sed -i 's/.*htmldir.*/htmldir \/var\/www\/html\/munin/g' /etc/munin/munin.conf
-# sudo mkdir /var/www/html/munin
-# sudo chown munin:munin /var/www/html/munin
-# sudo sed -i 's/localhost.localdomain/MuninMonitor/g' /etc/munin/munin.conf
-# sudo sed -i 's/\/var\/cache\/munin\/www/\/var\/www\/html\/munin/g' /etc/munin/apache24.conf
-# sudo sed -i '0,/Require/{s/Require.*/Require all granted/}' /etc/munin/apache24.conf

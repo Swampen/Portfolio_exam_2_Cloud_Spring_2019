@@ -26,7 +26,7 @@ export ipSubnet="10\.10"
 # This is the name to be used for creation of the keypair used for authentication
 export keyPairName="dats06-key"
 # This is the loctation for the private-key to be used for accessing the vm
-export sshKeyLocation="~/.ssh/$keyPairName.pem"
+export sshKeyLocation=~/.ssh/$keyPairName.pem
 # Usename for logging into vms
 export username="ubuntu"
 # Name of master host
