@@ -38,10 +38,20 @@ sudo locale-gen nb_NO.UTF-8
 sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8;
 sudo add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.1/ubuntu xenial main';
 sudo apt-get update -y;
-sudo DEBIAN_FRONTEND=noninteractive apt-get -y install mariadb-server rsync;
 ")
+
 echo "Paralell ssh mariadb setup"
-parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "$dbSetupCommands"
+
+
+# Rebooting vm to avoid dpkg issues
+echo "Rebooting the VMs"
+for i in ${!vmnames[@]}; do
+  let n=i+1
+	echo -n "$n/${#vmnames[@]} - rebooting ${vmnames[$i]} - "
+  openstack server reboot --wait ${vmnames[$i]}
+done
+
+parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo DEBIAN_FRONTEND=noninteractive apt-get -y install mariadb-server rsync;"
 
 ################ WRITING CONFIG FILES ON DBSERVERS #####################
 
