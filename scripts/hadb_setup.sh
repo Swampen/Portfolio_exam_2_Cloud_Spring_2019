@@ -41,17 +41,21 @@ sudo apt-get update -y;
 ")
 
 echo "Paralell ssh mariadb setup"
+parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "$dbSetupCommands"
 
+echo "sleeping.....ZZZZZZZZZzzzzzzzzzz......."
+sleep 3
 
 # Rebooting vm to avoid dpkg issues
 echo "Rebooting the VMs"
-for i in ${!vmnames[@]}; do
+for i in ${!dbServers[@]}; do
   let n=i+1
-	echo -n "$n/${#vmnames[@]} - rebooting ${vmnames[$i]} - "
-  openstack server reboot --wait ${vmnames[$i]}
+	echo -n "$n/${#dbServers[@]} - rebooting ${dbServers[$i]} - "
+  openstack server reboot --wait ${dbServers[$i]}
 done
 
-parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo DEBIAN_FRONTEND=noninteractive apt-get -y install mariadb-server rsync;"
+echo "Installing MariaDB on all servers"
+parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo DEBIAN_FRONTEND=noninteractive apt-get -y install mariadb-server rsync"
 
 ################ WRITING CONFIG FILES ON DBSERVERS #####################
 
@@ -97,7 +101,7 @@ do
 
 	if [[ ${dbNames[$i]} = $DBHostName"1" ]]
 	then
-		firstDB="${ipList[$i]}
+		firstDB="${ipList[$i]}"
 	fi
 	done
 
@@ -112,18 +116,17 @@ ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB"
 echo starting galera service on remaining servers
 parallel-ssh -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl start mysql"
 
-
-# Commands for creating maxsclae user
-#dbCommand=("
-#mysql -u root -e "create user '$username'@'$DBProxyHostName' identified by 'mypwd';";
-#mysql -u root -e "grant select on mysql.user to '$username'@'$DBProxyHostName';";
-#mysql -u root -e "grant select on mysql.db to '$username'@'$DBProxyHostName';";
-#mysql -u root -e "grant select on mysql.tables_priv to '$username'@'$DBProxyHostName';";
-#mysql -u root -e "grant show databases on *.* to '$username'@'$DBProxyHostName';";
-#")
-
-
 exit 0
+# Commands for creating maxsclae user
+dbCommand=("
+mysql -u root -e \"create user '$username'@'$DBProxyHostName' identified by 'mypwd';\";
+mysql -u root -e \"grant select on mysql.user to '$username'@'$DBProxyHostName';\";
+mysql -u root -e \"grant select on mysql.db to '$username'@'$DBProxyHostName';\";
+mysql -u root -e \"grant select on mysql.tables_priv to '$username'@'$DBProxyHostName';\";
+mysql -u root -e \"grant show databases on *.* to '$username'@'$DBProxyHostName';\";
+")
+
+
 # Creating maxscale user and granting permissions
 ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
