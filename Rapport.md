@@ -120,9 +120,10 @@ parameters for all the scripts. Describe each script file briefly in the report 
 
 Script files should be **well documented with appropriate comments.**
 
-**Decisions:** Explaination for the various decisions we have made throughout the project
+**Decisions:** Explanation for the various decisions we have made throughout the project
 
-- Keygen: We have decided to not create a new key since our load balancer, since it is never deleted, will have the dats06-key.pem key that existed before we ran the script. Therefore we continue using this key for any subsequent virtual machines we create in the scripts. The method for making the key has been left inside the vm_setup.sh script, but has been commented out, to show how it would have been done if we needed a new key
+- Keygen: We have decided to not create a new key since our load balancer, because it is never deleted, will have the dats06-key.pem key that existed before we ran the script. Therefore we continue using this key for any subsequent virtual machines we create in the scripts. The method for making the key has been left inside the vm_setup.sh script, but has been commented out, to show how it would have been done if we needed a new key
+- Security group: We, for this assignment, have only made a single security group, however we see that there is a possibility to have a second security group since the load balancer, for example, does not need any access to MySQL or the galera cluster. We think this will 
 
 **Group work details**: Provide following details on your group work.
 
