@@ -19,7 +19,6 @@ sudo chmod -R g+rw /var/www;
 sudo apt-get install php-fpm -y;
 sudo apt-get install php-mysql -y
 ")
-
 parallel-ssh -i -H "${ipList[*]}" \
         -l $username \
         -x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
@@ -63,7 +62,7 @@ webs=""
 cd /var/www/html
 git pull
 for web in $webs; do
-    rsync -chavz --delete --exclude ".*" -e "ssh -i ~/.ssh/KEY.pem" /var/www/html ubuntu@$web:/var/www/
+    rsync -chavz --delete --exclude ".*" -e "ssh -i ~/.ssh/KEY.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" /var/www/html ubuntu@$web:/var/www/
 done
 ')
 
@@ -86,9 +85,9 @@ scp -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/
 commands=("
 mv $keyPairName.pem .ssh/;
 echo '$rsyncScript' > rsyncScript.sh;
-sudo apt-get install cron
-sudo apt-get install git-all
-sudo rm -r /var/www/html
+sudo apt-get install cron -y;
+sudo apt-get install git-all -y;
+sudo rm -r /var/www/html;
 git clone $GITPHPDEPLOYMENT /var/www/html;
 (crontab -l ; echo \"*/3 * * * * /bin/sh /home/ubuntu/rsyncScript.sh\") | crontab -;
 ")
