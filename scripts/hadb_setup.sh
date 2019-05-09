@@ -135,7 +135,7 @@ scp -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/
 echo "SCP COMPLETE"
 
 dbCommand=("
-mysql -u root < "$dbSetupScript";
+mysql -u root < \"$dbSetupScript\";
 rm $dbSetupScript;
 ")
 
