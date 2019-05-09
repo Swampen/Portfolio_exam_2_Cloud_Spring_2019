@@ -48,7 +48,7 @@ sudo apt-get update -y;
 ")
 
 echo "Paralell ssh mariadb setup"
-parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "$dbSetupCommands"
+parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='$sshProxyCommand'" "$dbSetupCommands"
 
 echo "sleeping.....ZZZZZZZZZzzzzzzzzzz......."
 sleep 3
@@ -65,7 +65,7 @@ echo "sleeping........ZZZZZZZZZZzzzzzzzzz........"
 sleep 10
 
 echo "Installing MariaDB on all servers"
-parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo DEBIAN_FRONTEND=noninteractive apt-get -y install mariadb-server rsync"
+parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='$sshProxyCommand'" "sudo DEBIAN_FRONTEND=noninteractive apt-get -y install mariadb-server rsync"
 
 ################ WRITING CONFIG FILES ON DBSERVERS #####################
 
@@ -107,7 +107,7 @@ do
 	sudo rm ~/tmpfile
 ")
 
-	ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@${ipList[$i]}" "$galeraConfCommand"
+	ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="$sshProxyCommand" "$username@${ipList[$i]}" "$galeraConfCommand"
 
 	if [[ ${dbNames[$i]} = $DBHostName"1" ]]
 	then
@@ -116,15 +116,15 @@ do
 	done
 
 # Stopping sql service on all servers
-parallel-ssh -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl stop mysql"
+parallel-ssh -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='$sshProxyCommand'" "sudo systemctl stop mysql"
 
 # Starting new cluster
 echo "Initializing new galera cluster on $firstDB"
-ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "sudo galera_new_cluster"
+ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "sudo galera_new_cluster"
 
 # Starting service on remaining servers
 echo starting galera service on remaining servers
-parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl start mysql"
+parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='$sshProxyCommand'" "sudo systemctl start mysql"
 
 
 # Creating test database
@@ -139,7 +139,7 @@ mysql -u root < "$dbSetupScript";
 rm $dbSetupScript;
 ")
 
-ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
+ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
 # Commands for creating maxscale user
 # USING IP INSTEAD OF HOSTNAME FOR TESTING REMEMBER TO CHANGE THIS
@@ -153,7 +153,7 @@ mysql -u root -e \"grant show databases on *.* to '$maxscaleUser'@'$DBProxyName'
                                   
 # Creating maxscale user and granting permissions
 echo "Creating maxscale sql user and permissions"
-ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
+ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
 # Creating webserver user and granting permissions
 dbCommand=("
@@ -163,33 +163,7 @@ mysql -u root -e \"grant select on student_grades.* to '$webServerUser'@'%';\";
 ")
 
 echo "Creating webserver sql user and permissions"
-ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
-
-
-
-########################################################################################################
-# # Commands for creating webserver users
-# for i in {!webNames[@]}; do
-
-# # USING IP INSTEAD OF HOSTNAME FOR TESTING REMEMBER TO CHANGE THIS
-# 	dbCommand=("
-# 	mysql -u root -e \"create user '$webServerUser'@'${webNames[$i]}' identified by '$webServerPass';\";
-# 	mysql -u root -e \"grant select on mysql.user to '$webServerUser'@'${webNames[$i]}';\";
-# 	mysql -u root -e \"grant select on mysql.db to '$webServerUser'@'${webNames[$i]}';\";
-# 	mysql -u root -e \"grant select on mysql.tables_priv to '$webServerUser'@'${webNames[$i]}';\";
-# 	mysql -u root -e \"grant show databases on *.* to '$webServerUser'@'${webNames[$i]}';\";
-# 	")
-
-	                                    
-# 	# Creating webserver user and granting permissions
-# 	echo "Creating maxscale sql user and permissions"
-# 	ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@${webNames[$i]}" "$dbCommand"
-# done
-########################################################################################################
-
-
-
-################### SETUP COMMANDS TO BE RUN ON MAXSCALE SERVERS #####################
+ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
 
 # Installing maxscale on dbProxy Server
@@ -200,7 +174,7 @@ sudo wget https://downloads.mariadb.com/MaxScale/2.2.2/ubuntu/dists/xenial/main/
 sudo dpkg -i maxscale-2.2.2-1.ubuntu.xenial.x86_64.deb;
 sudo apt-get -f install -qq;
 ")
-ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$proxyIP" "$maxscaleInstallCommand"
+ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="$sshProxyCommand" "$username@$proxyIP" "$maxscaleInstallCommand"
 
 
 
@@ -220,7 +194,6 @@ echo "${serverString[*]}"
 
 serverString=$( echo ${serverString[*]} | tr " " ",")
 echo "Generated serverString = $serverString"
-#maxscaleHostString=$( echo ${dbNames[*]} | tr " " ",")
 
 proxyConfigString=("
 # Globals
@@ -279,4 +252,4 @@ sudo maxadmin enable account ubuntu
 ")
 
 echo "Writing maxscale config "
-ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$proxyIP" "$proxyConfCommand"
+ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="$sshProxyCommand" "$username@$proxyIP" "$proxyConfCommand"
