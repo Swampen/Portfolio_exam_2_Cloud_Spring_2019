@@ -10,7 +10,7 @@
 PARAM_FILE=$@
 source $PARAM_FILE
 
-# Generating hostname/IP array
+# Generating hostname/IP array for databases
 dbServers=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}' | grep $DBName`)
 ipList=()
 dbNames=()
@@ -24,6 +24,13 @@ for vm in ${dbServers[@]}; do
         dbNames+=(`echo $vm | sed -E s/$DBName-/$DBHostName/g`)
         ipList+=("$ip")
     fi
+done
+
+# Generating hostname array for databases
+webServers=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}' | grep $webServerName`)
+webNames=()
+for vm in ${webServers[@]}; do
+    webNames+=(`echo $vm | sed -E s/$webServerName-/$webServerHostName/g`)
 done
 
 # Generating host configstring for galeraserver
@@ -120,7 +127,7 @@ echo starting galera service on remaining servers
 parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl start mysql"
 
 
-# Commands for creating maxsclae user
+# Commands for creating maxscale user
 # USING IP INSTEAD OF HOSTNAME FOR TESTING REMEMBER TO CHANGE THIS
 dbCommand=("
 mysql -u root -e \"create user '$maxscaleUser'@'$DBProxyName' identified by '$maxscalePass';\";
@@ -129,16 +136,33 @@ mysql -u root -e \"grant select on mysql.db to '$maxscaleUser'@'$DBProxyName';\"
 mysql -u root -e \"grant select on mysql.tables_priv to '$maxscaleUser'@'$DBProxyName';\";
 mysql -u root -e \"grant show databases on *.* to '$maxscaleUser'@'$DBProxyName';\";
 ")
-
-                                     
+                                  
 # Creating maxscale user and granting permissions
 echo "Creating maxscale sql user and permissions"
 ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
-# Restarting mariaDB service on all servers
-#parallel-ssh -i -H "${ipList[*]}" -l "$username" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl restart mysql"
+
+# Commands for creating webserver users
+for i in {!webNames[@]}; do
+
+# USING IP INSTEAD OF HOSTNAME FOR TESTING REMEMBER TO CHANGE THIS
+	dbCommand=("
+	mysql -u root -e \"create user '$webServerUser'@'${webNames[$i]}' identified by '$webServerPass';\";
+	mysql -u root -e \"grant select on mysql.user to '$webServerUser'@'${webNames[$i]}';\";
+	mysql -u root -e \"grant select on mysql.db to '$webServerUser'@'${webNames[$i]}';\";
+	mysql -u root -e \"grant select on mysql.tables_priv to '$webServerUser'@'${webNames[$i]}';\";
+	mysql -u root -e \"grant show databases on *.* to '$webServerUser'@'${webNames[$i]}';\";
+	")
+
+	                                    
+	# Creating webserver user and granting permissions
+	echo "Creating maxscale sql user and permissions"
+	ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
+done
+
 
 ################### SETUP COMMANDS TO BE RUN ON MAXSCALE SERVERS #####################
+
 
 # Installing maxscale on dbProxy Server
 echo "Installing maxscale in dbproxy server"
