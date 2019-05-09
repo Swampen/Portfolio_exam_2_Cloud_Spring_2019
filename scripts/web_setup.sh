@@ -10,6 +10,8 @@ for vm in ${webServers[@]}; do
 done
 
 # All commands that will be executed over paralell ssh
+# Commands have all the installs that is needed on all the webservers
+# It also have premision regulation to /var/www
 commands=("
 sudo apt-get install nginx -y;
 sudo systemctl start nginx.service;
@@ -20,6 +22,7 @@ sudo apt-get install php-fpm -y;
 sudo apt-get install php-mysql -y
 ")
 
+# Parallel-ssh excecution
 parallel-ssh -i -H "${ipList[*]}" \
         -l $username \
         -x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
@@ -52,12 +55,16 @@ nginxTemplate=("server {
     }
 }")
 
+# Dynamic itteration for each webserv created, getting the amount off webservers from parameter file.
+# Setting up nginx config for each webserver with specified name by using a template shown over and replaceing "PLACEHOLDER".
+#
 for i in ${!webNames[@]}; do
     nginxConfig=`echo "$nginxTemplate" | sed "s/PLACEHOLDER/${webNames[$i]}/g"`
     ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@${ipList[$i]} \
     "sudo bash -c 'echo \"$nginxConfig\" > /etc/nginx/sites-available/default'; sudo service nginx restart"
 done
 
+# rsyncScript 
 rsyncScript=('#!/bin/bash
 webs=""
 cd /var/www/html
