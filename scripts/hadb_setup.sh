@@ -129,7 +129,17 @@ parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -
 
 # Creating test database
 
+dir=$(dirname "$0")
+scp -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="$sshProxyCommand" "$dir""/$dbSetupScript" $username@$firstDB:
 
+echo "SCP COMPLETE"
+
+dbCommand=("
+mysql -u root < "$dbSetupScript";
+rm $dbSetupScript;
+")
+
+ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
 # Commands for creating maxscale user
 # USING IP INSTEAD OF HOSTNAME FOR TESTING REMEMBER TO CHANGE THIS
@@ -145,6 +155,7 @@ mysql -u root -e \"grant show databases on *.* to '$maxscaleUser'@'$DBProxyName'
 echo "Creating maxscale sql user and permissions"
 ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
+# Creating webserver user and granting permissions
 dbCommand=("
 mysql -u root -e \"create user '$webServerUser'@'%' identified by '$webServerPass';\";
 mysql -u root -e \"grant select on mysql.user to '$webServerUser'@'%';\";
