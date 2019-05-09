@@ -141,24 +141,37 @@ mysql -u root -e \"grant show databases on *.* to '$maxscaleUser'@'$DBProxyName'
 echo "Creating maxscale sql user and permissions"
 ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
+dbCommand=("
+mysql -u root -e \"create user '$webServerUser'@'%' identified by '$webServerPass';\";
+mysql -u root -e \"grant select on mysql.user to '$webServerUser'@'%';\";
+mysql -u root -e \"grant select on student_grades.* to '$webServerUser'@'%';\";
+")
 
-# Commands for creating webserver users
-for i in {!webNames[@]}; do
+echo "Creating webserver sql user and permissions"
+ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@${webNames[$i]}" "$dbCommand"
 
-# USING IP INSTEAD OF HOSTNAME FOR TESTING REMEMBER TO CHANGE THIS
-	dbCommand=("
-	mysql -u root -e \"create user '$webServerUser'@'${webNames[$i]}' identified by '$webServerPass';\";
-	mysql -u root -e \"grant select on mysql.user to '$webServerUser'@'${webNames[$i]}';\";
-	mysql -u root -e \"grant select on mysql.db to '$webServerUser'@'${webNames[$i]}';\";
-	mysql -u root -e \"grant select on mysql.tables_priv to '$webServerUser'@'${webNames[$i]}';\";
-	mysql -u root -e \"grant show databases on *.* to '$webServerUser'@'${webNames[$i]}';\";
-	")
+
+
+########################################################################################################
+# # Commands for creating webserver users
+# for i in {!webNames[@]}; do
+
+# # USING IP INSTEAD OF HOSTNAME FOR TESTING REMEMBER TO CHANGE THIS
+# 	dbCommand=("
+# 	mysql -u root -e \"create user '$webServerUser'@'${webNames[$i]}' identified by '$webServerPass';\";
+# 	mysql -u root -e \"grant select on mysql.user to '$webServerUser'@'${webNames[$i]}';\";
+# 	mysql -u root -e \"grant select on mysql.db to '$webServerUser'@'${webNames[$i]}';\";
+# 	mysql -u root -e \"grant select on mysql.tables_priv to '$webServerUser'@'${webNames[$i]}';\";
+# 	mysql -u root -e \"grant show databases on *.* to '$webServerUser'@'${webNames[$i]}';\";
+# 	")
 
 	                                    
-	# Creating webserver user and granting permissions
-	echo "Creating maxscale sql user and permissions"
-	ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
-done
+# 	# Creating webserver user and granting permissions
+# 	echo "Creating maxscale sql user and permissions"
+# 	ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@${webNames[$i]}" "$dbCommand"
+# done
+########################################################################################################
+
 
 
 ################### SETUP COMMANDS TO BE RUN ON MAXSCALE SERVERS #####################
@@ -229,6 +242,7 @@ router=cli
 type=listener
 service=Galera Service
 protocol=MySQLClient
+address=0.0.0.0
 port=3306
  
 # MaxAdmin listener
@@ -236,6 +250,7 @@ port=3306
 type=listener
 service=MaxAdmin Service
 protocol=maxscaled
+address=0.0.0.0
 socket=default
 ")
 
