@@ -21,24 +21,7 @@ When the repository is updated we install MariaDB and rsync. This is done
 sudo DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server rsync -y;
 ```
 
-TIL GRUPPEN: DETTE STEGET ER IKKE GJORT, MEN BURDE KANSKJE VÆRE MED:
 
-Securing MariaDB installation - setting root password, removing ananymous users, disallow remote root login, and remove test db:
-
-````bash
-sudo mysql_secure_installation
-````
-
-Giving the following answers to prompts:
-
-````bash
-Enter current password for root (enter for none):
-Change the root password? [Y/n] n
-Remove anonymous users? [Y/n] Y
-Disallow root login remotely? [Y/n] Y
-Remove test database and access to it? [Y/n] Y
-Reload privilege tables now? [Y/n] Y
-````
 
 ### On MariaDB Galeracluster db1 do the following:
 
@@ -220,6 +203,8 @@ router=cli
 type=listener
 service=Galera Service
 protocol=MySQLClient
+# This needs to be here for ipv6 bug in maxscale
+address=0.0.0.0
 port=3306
  
 # MaxAdmin listener
@@ -227,6 +212,8 @@ port=3306
 type=listener
 service=MaxAdmin Service
 protocol=maxscaled
+# This needs to be here for ipv6 bug in maxscale
+address=0.0.0.0
 socket=default
 ````
 

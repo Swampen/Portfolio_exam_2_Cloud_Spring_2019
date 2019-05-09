@@ -1,22 +1,23 @@
 #! /bin/bash
 
-#! installation off nginx
-sudo apt update
-sudo apt install nginx
+# Sourcing parameter file given as argument
+source $1;
 
-#! starting nginx
-sudo systemctl start nginx.service
+# Running script for building instances
+echo "DEPLOYING VMs"
+#./vm_setup.sh
+./test.sh
 
-#! mariaDB installation
-#! STOP: sudo systemctl stop nginx.service
-#! ENABLE: sudo systemctl enable nginx.service
-sudo apt-get install mariadb-server mariadb-client
+# Running script for configuring webserver loadbalancer
+echo "DEPLOYING LOADBALANCER"
+./lb_setup.sh
 
-#! starting database
-#! STOP: sudo systemctl stop mysql.service
-#! ENABLE: sudo systemctl enable mysql.service
-sudo systemctl start mysql.service
+# Running script for configuring webservers
+echo "DEPLOYING WEBSERVERS"
+./web_setup.sh
 
-#! creating a root password and disallowing remote root access
-sudo mysql_secure_installation
+# Running script for configuring database proxy and db servers
+echo "DEPLOYING DATABASES"
+./hadb_setup.sh
+
 
