@@ -127,6 +127,10 @@ echo starting galera service on remaining servers
 parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl start mysql"
 
 
+# Creating test database
+
+
+
 # Commands for creating maxscale user
 # USING IP INSTEAD OF HOSTNAME FOR TESTING REMEMBER TO CHANGE THIS
 dbCommand=("
@@ -148,7 +152,7 @@ mysql -u root -e \"grant select on student_grades.* to '$webServerUser'@'%';\";
 ")
 
 echo "Creating webserver sql user and permissions"
-ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@${webNames[$i]}" "$dbCommand"
+ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
 
 
