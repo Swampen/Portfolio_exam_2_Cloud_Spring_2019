@@ -7,7 +7,8 @@ source $1;
 echo "DEPLOYING VMs"
 #./vm_setup.sh
 ./test.sh
-
+echo "Resting to let the VMs recover after reboot, pleas allow 15 seconds for a light snooze..........zzzzzzzzzzzzzZZZZZZZZZZZzzzzzzzZZZZzzzzzzz........"
+sleep 15
 # Running script for configuring webserver loadbalancer
 echo "DEPLOYING LOADBALANCER"
 ./lb_setup.sh
