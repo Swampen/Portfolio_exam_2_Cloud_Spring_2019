@@ -1,6 +1,6 @@
 #! /bin/bash
 
-echo "Updating VMs"
+echo "Updating and upgrading the VMs (this may take some time, go grab a coffee in the meantime)"
 # Optains the name of all the VMs
 vmnames=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}'`)
 names=()

@@ -40,7 +40,7 @@ nginxTemplate=("server {
     listen [::]:80 default_server;
 
     root /var/www/html;
-    index index.php ting.php test.php index.html index.htm index.nginx-debian.html;
+    index AVAILABLESITES index.html index.htm index.nginx-debian.html;
 
     server_name PLACEHOLDER;
 
@@ -57,6 +57,8 @@ nginxTemplate=("server {
         deny all;
     }
 }")
+
+nginxTemplate=`echo "$nginxTemplate" | sed "s/AVAILABLESITES/$CUSTOMAVAILABLESITES/g"`
 
 # Dynamic itteration for each webserv created, getting the amount off webservers from parameter file.
 # Setting up nginx config for each web server with specified name by using a template shown over and replaceing "PLACEHOLDER".

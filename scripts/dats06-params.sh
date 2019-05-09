@@ -48,10 +48,10 @@ export LBSTATPASSWD="thrown similar river"
 
 ################# Web Setup Parameters ######################
 export GITPHPDEPLOYMENT="https://github.com/JakobSimonsen/Portfolio_exam_deployment.git"
+export CUSTOMAVAILABLESITES="index.php test.php students-grades.php"
 
 ################# Databace Setup Parameters ######################
 export maxscalePass="thrown similar river"
 export maxscaleUser="maxScaleUsr"
 export webServerUser="dats06"
 export webServerPass="thrown similar river"
-export dbSetupScript="database-init-script.txt"
