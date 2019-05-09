@@ -33,7 +33,6 @@ PLACEHOLDER
 
 lbConfig=`echo "$lbConfigTemplate" | sed "s/PLACEHOLDER/$HAProxyEntry/g" | sed "s/PASS/$LBSTATPASSWD/g" |  sed "s/USER/$LBSTATUSER/g"`
 
-
 commands=("
 sudo apt-get install haproxy -y;
 sudo sed -i '$ a ENABLED=1' /etc/default/haproxy;

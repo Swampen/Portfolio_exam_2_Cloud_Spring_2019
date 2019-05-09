@@ -150,8 +150,8 @@ do
 		else
 			WebOK=true
 		fi
-		
-		# If i corresponds with the database proxy name 
+
+		# If i corresponds with the database proxy name
 		# delete said server, if i does not match then set corresponding boolean to true
 		if [[ $i = "$DBProxyName" ]]
 		then
@@ -160,7 +160,7 @@ do
 		else
 			DBPOK=true
 		fi
-	
+
 		# If i corresponds with the database name with a - and a number at the end
 		# delete said server, if i does not match then set corresponding boolean to true
 		if [[ $i =~ ($DBName-)([1-9]) ]]
@@ -175,7 +175,6 @@ do
 done
 echo "Setup complete!"
 echo "Updating VMs"
-
 # Optains the name of all the VMs
 vmnames=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}'`)
 names=()
@@ -199,6 +198,7 @@ for vm in ${vmnames[@]}; do
         	name2=`echo $name | sed -E s/$webServerName-/$webServerHostName/g`
 	elif [[ $name = $LBName ]]; then
         	name2=`echo $name | sed s/$LBName/$LBHostName/g`
+					lbIP="$ip"
 	else
         	echo not found
 	fi
@@ -206,6 +206,7 @@ for vm in ${vmnames[@]}; do
 	# Adding the entry for the vm to the hostsfile entry
 	hostsfileEntry="$ip $name $name2 \\n$hostsfileEntry"
 done
+
 
 # Updates and upgrades the VMs using a parallel ssh
 update=("
@@ -235,6 +236,9 @@ parallel-ssh -i -H "${ipList[*]}" \
 	-l $username \
 	-x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
 	"$script"
+
+ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@$lbIP \
+"sudo sed -i 's/.*/$LBHostName/g' /etc/hostname"
 
 # Rebooting all the VMs
 echo "Rebooting the VMs"
