@@ -1,4 +1,8 @@
 #! /bin/bash
+
+# Installs parallel-ssh
+sudo apt-get install pssh -y
+
 # Assigning "booleans"
 WebOK=false
 DBPOK=false
