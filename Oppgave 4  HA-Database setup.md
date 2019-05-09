@@ -198,7 +198,7 @@ protocol=MySQLBackend
 type=monitor
 module=galeramon
 servers=server1,server2,server3
-user=myuser
+user=ubuntu
 passwd=mypwd
 monitor_interval=1000
  
@@ -207,7 +207,7 @@ monitor_interval=1000
 type=service
 router=readwritesplit
 servers=server1,server2,server3
-user=myuser
+user=ubuntu
 passwd=mypwd
  
 # MaxAdmin Service
@@ -233,7 +233,7 @@ socket=default
 To avoid being asked for a password when starting the maxscale service, we need to add the user ubuntu to the maxscale group:
 
 ````bash
-sudo useradd ubuntu maxscale
+sudo adduser ubuntu maxscale
 ````
 
 We start the maxscale service:

@@ -121,16 +121,18 @@ parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -
 
 
 # Commands for creating maxsclae user
+# USING IP INSTEAD OF HOSTNAME FOR TESTING REMEMBER TO CHANGE THIS
 dbCommand=("
-mysql -u root -e \"create user '$username'@'$DBProxyHostName' identified by '$maxscalePass';\";
-mysql -u root -e \"grant select on mysql.user to '$username'@'$DBProxyHostName';\";
-mysql -u root -e \"grant select on mysql.db to '$username'@'$DBProxyHostName';\";
-mysql -u root -e \"grant select on mysql.tables_priv to '$username'@'$DBProxyHostName';\";
-mysql -u root -e \"grant show databases on *.* to '$username'@'$DBProxyHostName';\";
+mysql -u root -e \"create user '$maxscaleUser'@'$DBProxyName' identified by '$maxscalePass';\";
+mysql -u root -e \"grant select on mysql.user to '$maxscaleUser'@'$DBProxyName';\";
+mysql -u root -e \"grant select on mysql.db to '$maxscaleUser'@'$DBProxyName';\";
+mysql -u root -e \"grant select on mysql.tables_priv to '$maxscaleUser'@'$DBProxyName';\";
+mysql -u root -e \"grant show databases on *.* to '$maxscaleUser'@'$DBProxyName';\";
 ")
 
                                      
 # Creating maxscale user and granting permissions
+echo "Creating maxscale sql user and permissions"
 ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
 # Restarting mariaDB service on all servers
@@ -139,18 +141,34 @@ ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB"
 ################### SETUP COMMANDS TO BE RUN ON MAXSCALE SERVERS #####################
 
 # Installing maxscale on dbProxy Server
-ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$DBProxyHostName" "sudo apt-get -y install maxscale"
+echo "Installing maxscale in dbproxy server"
+
+maxscaleInstallCommand=("
+sudo wget https://downloads.mariadb.com/MaxScale/2.2.2/ubuntu/dists/xenial/main/binary-amd64/maxscale-2.2.2-1.ubuntu.xenial.x86_64.deb;
+sudo dpkg -i maxscale-2.2.2-1.ubuntu.xenial.x86_64.deb;
+sudo apt-get -f install -qq;
+")
+ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$proxyIP" "$maxscaleInstallCommand"
+
 
 
 # Generating maxscale config file
-for i in ${!dbNames[@]}
-do
+echo "Generating maxscale config file"
+echo ${dbNames[*]}
+serverString=()
+for i in ${!dbNames[@]}; do
 	let n=$i+1
 	serverBlock=("[server$n]\ntype=server\naddress=${dbNames[$i]}\nport=3306\nprotocol=MySQLBackend\n\n")
 	serverArr="$serverArr$serverBlock"
+	serverString+=("server$n ")
 done
 
-maxscaleHostString=$( echo ${dbNames[*]} | tr " " ",")
+echo "printing serverstring"
+echo "${serverString[*]}"
+
+serverString=$( echo ${serverString[*]} | tr " " ",")
+echo "Generated serverString = $serverString"
+#maxscaleHostString=$( echo ${dbNames[*]} | tr " " ",")
 
 proxyConfigString=("
 # Globals
@@ -164,7 +182,7 @@ $serverArr
 [Galera Monitor]
 type=monitor
 module=galeramon
-servers=$maxscaleHostString
+servers=$serverString
 user=$maxscaleUser
 passwd=$maxscalePass
 monitor_interval=1000
@@ -173,7 +191,7 @@ monitor_interval=1000
 [Galera Service]
 type=service
 router=readwritesplit
-servers=$maxscaleHostString
+servers=$serverString
 user=$maxscaleUser
 passwd=$maxscalePass
  
@@ -199,10 +217,12 @@ socket=default
 
 proxyConfCommand=("
 sudo echo -e '$proxyConfigString' > ~/tmpfile;
-sudo cp /home/ubuntu/tmpfile /etc/maxscale.cnf;
+sudo \cp -rf /home/ubuntu/tmpfile /etc/maxscale.cnf;
 sudo rm ~/tmpfile;
-sudo useradd ubuntu maxscale;
+sudo adduser ubuntu maxscale;
 sudo systemctl start maxscale.service;
+sudo maxadmin enable account ubuntu
 ")
 
-ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$DBProxyHostName" "$proxyConfCommand"
+echo "Writing maxscale config "
+ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$proxyIP" "$proxyConfCommand"
