@@ -90,8 +90,8 @@ sudo apt-get install cron
 sudo apt-get install git-all
 sudo rm -r /var/www/html
 git clone https://github.com/JakobSimonsen/Portfolio_exam_deployment.git /var/www/html;
+(crontab -l ; echo \"*/3 * * * * /bin/sh /home/ubuntu/rsyncScript.sh\") | crontab -;
 ")
-#(crontab -l ; echo \"*/3 * * * * /bin/sh /home/ubuntu/rsyncScript.sh\") | crontab -;
 
 ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@$primaryIP \
 "$commands"

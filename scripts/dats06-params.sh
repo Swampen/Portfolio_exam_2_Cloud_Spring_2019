@@ -42,6 +42,10 @@ export timezone="Europe/Oslo"
 # Keyboard layout parameter
 export keyboard="no"
 
+################# Load Balancer Parameters #################
+export LBSTATUSER="dats06"
+export LBSTATPASSWD="thrown similar river"
+
 ################# dbSetup Parameters ######################
 export maxscalePass="thrown similar river"
 export maxscaleUser="maxScaleUsr"
