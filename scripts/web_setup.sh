@@ -63,7 +63,7 @@ webs=""
 cd /var/www/html
 git pull
 for web in $webs; do
-    rsync -avz --delete --exclude ".*" -e "ssh -i ~/.ssh/KEY.pem" /var/www/html ubuntu@$web:/var/www/html
+    rsync -chavz --delete --exclude ".*" -e "ssh -i ~/.ssh/KEY.pem" /var/www/html ubuntu@$web:/var/www/
 done
 ')
 
@@ -93,5 +93,5 @@ git clone https://github.com/JakobSimonsen/Portfolio_exam_deployment.git /var/ww
 (crontab -l ; echo \"*/3 * * * * /bin/sh /home/ubuntu/rsyncScript.sh\") | crontab -;
 ")
 
-ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@$primaryIP \
-"$commands"
+  ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@$primaryIP \
+  "$commands"
