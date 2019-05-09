@@ -63,8 +63,7 @@ parallel-ssh -i -H "${ipList[*]}" \
 	-x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
 	"$script"
 
-ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@$lbIP \
-"sudo sed -i 's/.*/$LBHostName/g' /etc/hostname"
+ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@$lbIP "sudo sed -i s/.*/$LBHostName/g /etc/hostname"
 
 # Rebooting all the VMs
 echo "Rebooting the VMs"
