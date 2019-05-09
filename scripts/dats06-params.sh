@@ -47,3 +47,5 @@ export LBSTATUSER="dats06"
 export LBSTATPASSWD="thrown similar river"
 
 ################# dbSetup Parameters ######################
+export maxscalePass="thrown similar river"
+export maxscaleUser="maxScaleUsr"

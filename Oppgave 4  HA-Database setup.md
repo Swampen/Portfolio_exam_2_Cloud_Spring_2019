@@ -115,7 +115,7 @@ mysql -u root -p -e "show status like 'wsrep_cluster_size'"
 
 This produces the following output:
 
-![1557146368097](/home/fredrik/Documents/HIOA/Cloud/Portfolio_exam_2_Cloud/img/1557146368097.png)
+![1557146368097](./img/1557146368097.png)
 
 After verifying that the result is as expected, we run the following command on BOTH db2 and db3:
 
@@ -131,7 +131,7 @@ mysql -u root -p -e "show status like 'wsrep_cluster_size'"
 
 This produces the following output:
 
-![1557146683128](/home/fredrik/Documents/HIOA/Cloud/Portfolio_exam_2_Cloud/img/1557146683128.png)
+![1557146683128](./img/1557146683128.png)
 
 As evident by the screenshot, all nodes are part of the cluster. 
 
@@ -244,7 +244,7 @@ sudo systemctl start maxscale.service
 
 Then we confirm everything running as expected:
 
-![1557222569790](/home/fredrik/Documents/HIOA/Cloud/Portfolio_exam_2_Cloud/img/1557222569790.png)
+![1557222569790](./img/1557222569790.png)
 
 To check change of  master role, we disable server 1 by running the following command on db1:
 
@@ -258,7 +258,7 @@ Next we run the following command on dbproxy and observe the result:
 maxadmin list servers
 ```
 
-![1557222686770](/home/fredrik/Documents/HIOA/Cloud/Portfolio_exam_2_Cloud/img/1557222686770.png)
+![1557222686770](./img/1557222686770.png)
 
 
 
