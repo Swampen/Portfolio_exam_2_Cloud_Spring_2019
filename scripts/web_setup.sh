@@ -104,7 +104,7 @@ commands=("
 mv $keyPairName.pem .ssh/;
 echo '$rsyncScript' > rsyncScript.sh;
 sudo apt-get install cron -y;
-sudo apt-get install git-all -y;
+sudo apt-get install git -y;
 sudo rm -r /var/www/html;
 git clone $GITPHPDEPLOYMENT /var/www/html;
 (crontab -l ; echo \"*/3 * * * * /bin/sh /home/ubuntu/rsyncScript.sh\") | crontab -;
