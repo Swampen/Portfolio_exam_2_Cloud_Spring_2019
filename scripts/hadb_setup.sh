@@ -54,6 +54,9 @@ for i in ${!dbServers[@]}; do
   openstack server reboot --wait ${dbServers[$i]}
 done
 
+echo "sleeping........ZZZZZZZZZZzzzzzzzzz........"
+sleep 10
+
 echo "Installing MariaDB on all servers"
 parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo DEBIAN_FRONTEND=noninteractive apt-get -y install mariadb-server rsync"
 
