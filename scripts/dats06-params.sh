@@ -49,3 +49,8 @@ export LBSTATPASSWD="thrown similar river"
 ################# dbSetup Parameters ######################
 export maxscalePass="thrown similar river"
 export maxscaleUser="maxScaleUsr"
+<<<<<<< HEAD
+=======
+export webServerUser="dats06"
+export webServerPass="thrown similar river"
+>>>>>>> 60e6979842057cf4ec174edd7080620d831b2e0e
