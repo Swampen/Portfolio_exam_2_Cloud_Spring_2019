@@ -114,94 +114,92 @@ ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB"
 
 # Starting service on remaining servers
 echo starting galera service on remaining servers
-parallel-ssh -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl start mysql"
+parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl start mysql"
 
-exit 0
+
 # Commands for creating maxsclae user
 dbCommand=("
-mysql -u root -e \"create user '$username'@'$DBProxyHostName' identified by 'mypwd';\";
+mysql -u root -e \"create user '$username'@'$DBProxyHostName' identified by '$maxscalePass';\";
 mysql -u root -e \"grant select on mysql.user to '$username'@'$DBProxyHostName';\";
 mysql -u root -e \"grant select on mysql.db to '$username'@'$DBProxyHostName';\";
 mysql -u root -e \"grant select on mysql.tables_priv to '$username'@'$DBProxyHostName';\";
 mysql -u root -e \"grant show databases on *.* to '$username'@'$DBProxyHostName';\";
 ")
 
-
+                                     
 # Creating maxscale user and granting permissions
 ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
 
 # Restarting mariaDB service on all servers
-parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl restart mysql"
-
-# Creating maxscale user and granting permissions
-ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$firstDB" "$dbCommand"
-
-# Restarting mariaDB service on all servers
-parallel-ssh -i -H "$DBHOSTS" -l "$username" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl restart mysql"
+#parallel-ssh -i -H "${ipList[*]}" -l "$username" -x "-i $keyLocation -o StrictHostKeyChecking=no -o ProxyCommand='$sshProxyCommand'" "sudo systemctl restart mysql"
 
 ################### SETUP COMMANDS TO BE RUN ON MAXSCALE SERVERS #####################
 
 # Installing maxscale on dbProxy Server
 ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$DBProxyHostName" "sudo apt-get -y install maxscale"
 
-for ((i = 1; i <= $numberOfDBs; i++))
+
+# Generating maxscale config file
+for i in ${!dbNames[@]}
 do
-	serverBlock=("[server$i]\ntype=server\naddress=$DBHostName$i\nport=3306\nprotocol=MySQLBackend\n\n")
+	let n=$i+1
+	serverBlock=("[server$n]\ntype=server\naddress=${dbNames[$i]}\nport=3306\nprotocol=MySQLBackend\n\n")
 	serverArr="$serverArr$serverBlock"
 done
 
-maxscaleHostString=$(echo ${DBHOSTS[*]} | tr " " ",")
-
+maxscaleHostString=$( echo ${dbNames[*]} | tr " " ",")
 
 proxyConfigString=("
-# Globals\n
-[maxscale]\n
-threads=4\n
- \n
-# Servers\n
+# Globals
+[maxscale]
+threads=4
+ 
+# Servers
 $serverArr
- \n
-# Monitoring for the servers\n
-[Galera Monitor]\n
-type=monitor\n
-module=galeramon\n
-servers=$maxscaleHostString\n
-user=myuser\n
-passwd=mypwd\n
-monitor_interval=1000\n
- \n
-# Galera router service\n
-[Galera Service]\n
-type=service\n
-router=readwritesplit\n
-servers=$maxscaleHostString\n
-user=myuser\n
-passwd=mypwd\n
- \n
-# MaxAdmin Service\n
-[MaxAdmin Service]\n
-type=service\n
-router=cli\n
- \n
-# Galera cluster listener\n
-[Galera Listener]\n
-type=listener\n
-service=Galera Service\n
-protocol=MySQLClient\n
-port=3306\n
- \n
-# MaxAdmin listener\n
-[MaxAdmin Listener]\n
-type=listener\n
-service=MaxAdmin Service\n
-protocol=maxscaled\n
-socket=default\n
+ 
+# Monitoring for the servers
+[Galera Monitor]
+type=monitor
+module=galeramon
+servers=$maxscaleHostString
+user=$maxscaleUser
+passwd=$maxscalePass
+monitor_interval=1000
+ 
+# Galera router service
+[Galera Service]
+type=service
+router=readwritesplit
+servers=$maxscaleHostString
+user=$maxscaleUser
+passwd=$maxscalePass
+ 
+# MaxAdmin Service
+[MaxAdmin Service]
+type=service
+router=cli
+ 
+# Galera cluster listener
+[Galera Listener]
+type=listener
+service=Galera Service
+protocol=MySQLClient
+port=3306
+ 
+# MaxAdmin listener
+[MaxAdmin Listener]
+type=listener
+service=MaxAdmin Service
+protocol=maxscaled
+socket=default
 ")
 
 proxyConfCommand=("
-sudo echo -e '$proxyConfigString' > ~/tmpfile
-sudo cp /home/ubuntu/tmpfile /etc/maxscale.cnf
-sudo rm ~/tmpfile
+sudo echo -e '$proxyConfigString' > ~/tmpfile;
+sudo cp /home/ubuntu/tmpfile /etc/maxscale.cnf;
+sudo rm ~/tmpfile;
+sudo useradd ubuntu maxscale;
+sudo systemctl start maxscale.service;
 ")
 
 ssh -i "$sshKeyLocation" -o ProxyCommand="$sshProxyCommand" "$username@$DBProxyHostName" "$proxyConfCommand"

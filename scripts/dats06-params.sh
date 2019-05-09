@@ -43,3 +43,5 @@ export timezone="Europe/Oslo"
 export keyboard="no"
 
 ################# dbSetup Parameters ######################
+export maxscalePass="thrown similar river"
+export maxscaleUser="maxScaleUsr"
