@@ -34,7 +34,7 @@ export masterHost="dats.vlab.cs.hioa.no"
 # Name of user on master host
 export masterUser="dats06"
 # Proxycommand for ssh into vms
-export sshProxyCommand="ssh -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR $masterUser@$masterHost -W %h:%p"
+export sshProxyCommand="ssh -i \"$sshKeyLocation\" -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR $masterUser@$masterHost -W %h:%p"
 # Locale parameter
 export userLocale="nb_NO.UTF-8"
 # Timezone parameter
@@ -46,7 +46,10 @@ export keyboard="no"
 export LBSTATUSER="dats06"
 export LBSTATPASSWD="thrown similar river"
 
-################# dbSetup Parameters ######################
+################# Web Setup Parameters ######################
+export GITPHPDEPLOYMENT="https://github.com/JakobSimonsen/Portfolio_exam_deployment.git"
+
+################# Databace Setup Parameters ######################
 export maxscalePass="thrown similar river"
 export maxscaleUser="maxScaleUsr"
 export webServerUser="dats06"
