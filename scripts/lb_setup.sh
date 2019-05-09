@@ -4,15 +4,15 @@ webServers=()
 webs=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}' | grep $webServerName | sed s/$webServerName-/$webServerHostName/g`)
 HAProxyEntry=""
 for i in ${!webs[@]}; do
-    HAProxyEntry="server $webServerHostName-$i ${webs[$i]}:80 check weight 10 \\n$HAProxyEntry"
+    let n=$i+1
+    HAProxyEntry="    server $webServerHostName-$n ${webs[$i]}:80 check weight 10 \\n$HAProxyEntry"
 done
 
-setup=("
-sudo apt-get install haproxy -y
-sudo sed -i '$ a ENABLED=1' /etc/default/haproxy
-sudo sed -i "s/.*CONFIG=.*/CONFIG=\"\/etc\/haproxy\/haproxy.cfg\"/g" /etc/default/haproxy
+lbvm=`openstack server list -c Name | awk '!/^$|Name/ {print $2;}' | grep $LBName`
+lbIP=`openstack server show $lbvm | grep -o "$ipSubnet\.[0-9]\{1,3\}\.[0-9]\{1,3\}"`
 
-echo bash -c 'frontend web-frontend
+lbConfigTemplate=('
+frontend web-frontend
     bind *:80
     mode http
     default_backend web-backend
@@ -21,14 +21,26 @@ backend web-backend
     balance roundrobin
     mode http
     option httpchk HEAD / HTTP/1.1\r\nHost:\ localhost
-    server web-1 web1:80 check weight 10
-    server web-2 web2:80 check weight 10
-    server web-3 web3:80 check weight 10
+PLACEHOLDER
 
     # Monitoring
     stats enable
     stats refresh 30s
     stats uri /stats
     stats realm Haproxy\ Statistics
-    stats auth dats06:\"thrown similar river\"'
+    stats auth USER:\"PASS\"
+')
+
+lbConfig=`echo "$lbConfigTemplate" | sed "s/PLACEHOLDER/$HAProxyEntry/g" | sed "s/PASS/$LBSTATPASSWD/g" |  sed "s/USER/$LBSTATUSER/g"`
+
+
+commands=("
+sudo apt-get install haproxy -y;
+sudo sed -i '$ a ENABLED=1' /etc/default/haproxy;
+sudo sed -i 's/.*CONFIG=.*/CONFIG=\"\/etc\/haproxy\/haproxy.cfg\"/g' /etc/default/haproxy;
+sudo bash -c 'echo \"$lbConfig\" >> /etc/haproxy/haproxy.cfg';
+sudo service haproxy restart;
 ")
+
+ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@$lbIP \
+"$commands"
