@@ -2,6 +2,9 @@
 
 # This script rebiulds all VMs to base ubuntu 16.04 image without deleting the VMs.
 
+# Getting correct path to script directory
+dir=$(dirname "$0")
+
 # Sourcing openstack 
 source "$dir"/dats06_project-openrc.sh
 
