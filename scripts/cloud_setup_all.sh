@@ -5,10 +5,12 @@ source $1;
 
 # Running script for building instances
 echo "DEPLOYING VMs"
-#./vm_setup.sh
-./test.sh
+./vm_setup.sh
+
+# Sleeping to avoid problem with Alto reporting instance readiness to early
 echo "Resting to let the VMs recover after reboot, pleas allow 15 seconds for a light snooze..........zzzzzzzzzzzzzZZZZZZZZZZZzzzzzzzZZZZzzzzzzz........"
 sleep 15
+
 # Running script for configuring webserver loadbalancer
 echo "DEPLOYING LOADBALANCER"
 ./lb_setup.sh
