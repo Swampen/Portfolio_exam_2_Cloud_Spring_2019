@@ -48,7 +48,7 @@ The whole work is divided into different tasks listed below, which include <span
 
 3. A screenshot of the list of VMs created.
 
-    ![1557133367555](img/1557133367555.png)
+    ![1557475791691](img/1557475791691.png)
 
 4. A screenshot of the host names defined in /etc/hosts of one of the servers (say, datsXX-lb). Give short hostnames to the servers here, such as lb, web1, web2, web3, db1, db2, db3, and
    maxscale and use names in all the configurations instead of hard coded IPs.
@@ -60,16 +60,16 @@ The whole work is divided into different tasks listed below, which include <span
 5. A table listing the VMs with these information: VM name, hostname, IP, flavor, software you
    installed in the VM, and ports used for specific purpose(s).
 
-   | VMs            | Hostname | IP   | Flavor      | Software                                                     | Ports                      |
-   | -------------- | -------- | ---- | ----------- | ------------------------------------------------------------ | -------------------------- |
-   | dats06-lb      | lb       |      | m1.1GB      | HAProxy                                                      | 22, 80                     |
-   | dats06-web-1   | web1     |      | m1.512MB4GB | Nginex<br />MariaDB-client<br />MySQL<br />php<br />Git<br />Cron | 22, 80, 3306               |
-   | dats06-web-2   | web2     |      | m1.512MB4GB | Nginex<br />MariaDB-client<br />MySQL<br />php<br />Git<br />Cron | 22, 80, 3306               |
-   | dats06-web-3   | web3     |      | m1.512MB4GB | Nginex<br />MariaDB-client<br />MySQL<br />php<br />Git<br />Cron | 22, 80, 3306               |
-   | dats06-db-1    | db1      |      | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
-   | dats06-db-2    | db2      |      | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
-   | dats06-db-3    | db3      |      | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
-   | dats06-dbproxy | dbproxy  |      | m1.512MB4GB | MaxScale                                                     | 22, 3306                   |
+   | VMs            | Hostname | IP          | Flavor      | Software                                                     | Ports                      |
+   | -------------- | -------- | ----------- | ----------- | ------------------------------------------------------------ | -------------------------- |
+   | dats06-lb      | lb       | 10.10.4.41  | m1.1GB      | HAProxy                                                      | 22, 80                     |
+   | dats06-web-1   | web1     | 10.10.7.142 | m1.512MB4GB | Nginex<br />MariaDB-client<br />MySQL<br />php<br />Git<br />Cron | 22, 80, 3306               |
+   | dats06-web-2   | web2     | 10.10.7.143 | m1.512MB4GB | Nginex<br />MariaDB-client<br />MySQL<br />php<br />Git<br />Cron | 22, 80, 3306               |
+   | dats06-web-3   | web3     | 10.10.7.144 | m1.512MB4GB | Nginex<br />MariaDB-client<br />MySQL<br />php<br />Git<br />Cron | 22, 80, 3306               |
+   | dats06-db-1    | db1      | 10.10.7.147 | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
+   | dats06-db-2    | db2      | 10.10.7.149 | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
+   | dats06-db-3    | db3      | 10.10.7.148 | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
+   | dats06-dbproxy | dbproxy  | 10.10.7.145 | m1.512MB4GB | MaxScale                                                     | 22, 3306                   |
 
    
 
@@ -130,15 +130,65 @@ Script files should be **well documented with appropriate comments.**
   chmod 400 $KEYLOCATION
   ```
 
-  This creates the key on the ALTO cloud and redirects it into a file on your computer and gives it proper permissions
+  This creates the key on the ALTO cloud and redirects it into a file on your computer and gives it proper permissions.
 
-- Security group: We, for this assignment, have only made a single security group, however we see that there is a possibility to have a second security group since the load balancer, for example, does not need any access to MySQL or the galera cluster. We think this will 
+  The private key can be found in authorized_keys on dats-master.
+
+- Security group: We, for this assignment, have only made a single security group, however we see that there is a possibility to have a second security group since the load balancer, for example, does not need any access to MySQL or the galera cluster. We think this will help the security of the entire system.
 
 **Group work details**: Provide following details on your group work.
 
 - [ ] How you worked as a team [How often did you meet, how tasks were distributed among your group members, whether you managed to make everyone participate and known about all the tasks (not just what s/he did), etc.].
+
+  ​	We have been working very well as a team, we have met almost every day the last 2 weeks of the assignment to work on it. In the beginning we assigned tasks to each member, on "part" to each one: Michael(VM-setup) Ole-Martin(LB-setup), Jakob(Web-setup) and Fredrik(Database-setup). We all know what everyone is doing because we help each other.
+
 - [ ] State who did what in terms of concrete tasks and contribution of the individual members in percentage (not for individual tasks, but as a whole project) using the one who contributed the most as a reference (i.e., 100%).
+
+  ​	Task 1.
+
+  ​		Vm setup: Michael
+
+  ​		Hostfile setup: Ole-Martin
+
+  ​	Task 2.
+
+  ​		Ole-Martin
+
+  ​	Task 3. 
+
+  ​		Jakob and Ole-Martin
+
+  ​	Task 4. 
+
+  ​		Fredrik
+
+  ​	Task 5.
+
+  ​		vm_setup:
+
+  ​			vm-part: Michael
+
+  ​			hostfile-part: Ole-Martin
+
+  ​		lb_setup:
+
+  ​			Ole-Martin
+
+  ​		web_setup:
+
+  ​			Jakob
+
+  ​			Ole-Martin
+
+  ​		hadb_setup:
+
+  ​			Fredrik
+
+  ​			Ole-Martin
+
 - [ ] Problems or difficulties faced (if any) regarding working in the group.
+
+  ​	We have had prior experience working as a group, so the first thing we did when we started working on the assignment was to distribute the tasks among us and create a git repo. Due to all of this we have had very few issues working together as a group
 
 7. **Self-evaluation**: Evaluate your own submission by filling up the table below. It has two parts: section-wise expected scores (out of the given full scores in brackets), and comments. Comments should be given point-wise whether you have done what has been asked properly (+), or not done or if any issues/weaknesses (-), and any other comments worth mentioning (*).
 
