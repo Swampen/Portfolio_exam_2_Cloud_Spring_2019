@@ -1,14 +1,6 @@
 #! /bin/bash
 
 # This script configures MariadB in a multi master setup configured via galeracluster.
-# The  script takes a single config file as parameter
-# DEPENDENCIES
-# Parallel-SSH:	sudo apt-get install pssh
-
-
-# TODO: THE PARAMETER FILE IS TO BE SOURCED BY THE SETUP-SCRIPT REMOVE THIS WHEN TESTING IS COMPLETE!!!!
-PARAM_FILE=$@
-source $PARAM_FILE
 
 # Generating hostname/IP array for databases
 dbServers=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}' | grep $DBName`)
@@ -128,7 +120,6 @@ parallel-ssh -t 600 -i -H "${ipList[*]}" -l "$username" -x "-i $sshKeyLocation -
 
 
 # Creating test database
-
 dir=$(dirname "$0")
 scp -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="$sshProxyCommand" "$dir""/$dbSetupScript" $username@$firstDB:
 
