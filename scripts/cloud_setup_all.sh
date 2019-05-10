@@ -19,6 +19,7 @@ source $1;
 # Checking for ssh key presence
 if [ ! -f "$sshKeyLocation" ]; then
   echo "ERROR: The the key dats06-key.pem MUST be placed in the folder: ~/.ssh/"
+  exit 0
 fi
 
 # Running script for building instances
