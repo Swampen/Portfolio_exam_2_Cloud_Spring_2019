@@ -74,7 +74,7 @@ done
 rsyncScript=('#!/bin/bash
 webs=""
 cd /var/www/html
-git pull
+git pull GITREPO
 for web in $webs; do
     rsync -chavz --delete --exclude ".*" -e "ssh -i ~/.ssh/KEY.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" /var/www/html ubuntu@$web:/var/www/
 done
@@ -92,9 +92,8 @@ for i in ${!webNames[@]}; do
 done
 
 # incerting the other web server names into the rsync script
-# then replaces the KEY placeholer
-rsyncScript=`echo "$rsyncScript" | sed "/webs=/ s/^\(.*\)\(\"\)/\1${temp[*]}\2/"`
-rsyncScript=`echo "$rsyncScript" | sed "s/KEY/$keyPairName/g"`
+# then replaces the KEY placeholer, and adding the specified git repository
+rsyncScript=`echo "$rsyncScript" | sed "/webs=/ s/^\(.*\)\(\"\)/\1${temp[*]}\2/" | sed "s/KEY/$keyPairName/g" | sed "s/GITREPO/$GITPHPDEPLOYMENT/g"`
 
 # Copying the ssh key so that the main web server is able to authorize while rsyncing to the other web servers
 scp -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand="$sshProxyCommand" "$sshKeyLocation" $username@$primaryIP:
