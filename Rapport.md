@@ -45,17 +45,17 @@ Keypairs:
 
 ![1557133197127](img/1557133197127.png)
 
-- A screenshot of the list of VMs created.
+A screenshot of the list of VMs created.
 
 
 ![1557475791691](img/1557475791691.png)
 
 - A screenshot of the host names defined in /etc/hosts of one of the servers (say, datsXX-lb). Give short hostnames to the servers here, such as lb, web1, web2, web3, db1, db2, db3, and
   maxscale and use names in all the configurations instead of hard coded IPs.
-
+  
   Load balancer's hosts file:
 
-![1557133775942](img/1557133775942.png)
+![1557481673114](img/1557481673114.png)
 
 - A table listing the VMs with these information: VM name, hostname, IP, flavor, software you
   installed in the VM, and ports used for specific purpose(s).
@@ -75,23 +75,24 @@ Keypairs:
 
 2. **HAProxy setup**: Setup HAProxy for the load balancer and monitoring. Load balancer should use round robin algorithm with equal weights. HAProxy monitoring page should be configured such that it can be accessed from the url, <span href="dats.vlab.cs.hioa.no:8006/stats" style="color: blue">dats.vlab.cs.hioa.no:80XX/stats</span>. Use your ALTO credentials for the authentication purpose.
 
-- [ ] Provide screenshots of the HAProxy configuration.
+- Provide screenshots of the HAProxy configuration.
 
-  HAproxy config
+  HAproxy config:
 
-  ![1557134437526](img/1557134437526.png)
+![1557134437526](img/1557134437526.png)
 
-  ![1557134478098](img/1557134478098.png)
+![1557134478098](img/1557134478098.png)
 
-- [ ] Provide screenshot of the resulting monitoring web page.
+- Provide screenshot of the resulting monitoring web page.
 
-  ![1557135024207](img/1557135024207.png)
 
-- [ ] Show screenshots of the test results confirming working load balancer by curling a web page <span style="color: blue">testlb.php</span> in a loop from a local computer (e.g., your laptop), which shows alternately changing the web server IP. 
+![1557135024207](img/1557135024207.png)
 
-  ![1557147286058](img/1557147286058.png)
+- Show screenshots of the test results confirming working load balancer by curling a web page <span style="color: blue">testlb.php</span> in a loop from a local computer (e.g., your laptop), which shows alternately changing the web server IP. 
 
-  
+![1557147286058](img/1557147286058.png)
+
+
 
 3. **Web server setup**: Setup all the web servers using <span style="color: red">Nginx</span> with the support for dynamic web development with PHP and MariaDB and give a proper ownership and permission to the web root folder for the ‘ubuntu’ user.
 
@@ -132,11 +133,9 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
   chmod 400 $KEYLOCATION
   ```
 
-  This creates the key on the ALTO cloud and redirects it into a file on your computer and gives it proper permissions.
+  This creates the key on the ALTO cloud and redirects it into a file on your computer and gives it proper permissions
 
-  The private key can be found in authorized_keys on dats-master.
-
-- Security group: We, for this assignment, have only made a single security group, however we see that there is a possibility to have a second security group since the load balancer, for example, does not need any access to MySQL or the galera cluster. We think this will help the security of the entire system.
+- Security group: We, for this assignment, have only made a single security group, however we see that there is a possibility to have a second security group since the load balancer, for example, does not need any access to MySQL or the galera cluster. We think this will 
 
 6. **Group work details**: Provide following details on your group work.
 
@@ -160,21 +159,21 @@ State who did what in terms of concrete tasks and contribution of the individual
 | Task 6.            |                      | x                 |                |                  |
 | Task 7.            |                      | x                 |                |                  |
 
-Due to the lb_setup.sh script being very small and easy to setup, Ole-Martin helped out the other scripts in addition to doing it.
+​	Due to the lb_setup.sh script being very small and easy to setup, Ole-Martin helped out the other scripts in addition to doing it.
 
-Due to the interconnectivity of the tasks, everyone has contributed to some degree to every task. The ones marked are the main contributers to each task.
+​	Due to the interconnectivity of the tasks, everyone has contributed to some degree to every task. The ones marked are the main contributers to each task.
 
-Work percentage:
+​	Work percentage:
 
-Ole-Martin: 100%
+​	Ole-Martin: 100%
 
-Michael: 100%
+​	Michael: 100%
 
-Jakob: 100%
+​	Jakob: 100%
 
-Fredrik: 100%
+​	Fredrik: 100%
 
-Problems or difficulties faced (if any) regarding working in the group.
+​	Problems or difficulties faced (if any) regarding working in the group.
 
 - We have had prior experience working as a group, so the first thing we did when we started working on the assignment was to distribute the tasks among us and create a git repo. Due to all of this we have had very few issues working together as a group
 
@@ -189,7 +188,7 @@ Problems or difficulties faced (if any) regarding working in the group.
    | Automation with scripts(25) | 25              | (+) params script with all parameters needed<br />(+) All scripts setup and working properly |
    | Group work details (3)      | 3               | (+) Teamwork has been working well                           |
    | Self-Evaluation (2)         | 2               | (+) Honest self-evaluation                                   |
-   | Report quality(3)           | 3               | (+) Clean and readable report                                |
+   | Report quality(3)           | 3               | (+) Clean and readable report<br />(+) All screenshots provided<br />(+) All questions provided |
    | Total score(100)            |                 |                                                              |
 
    
