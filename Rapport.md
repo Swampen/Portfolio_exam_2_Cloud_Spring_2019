@@ -151,311 +151,98 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
 
   ![1557151047477](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557151047477.png)
 
-  Steps to do a manual configuration of the DBs:
-
-  ### On all db servers run the following sequence of commands:
-
-  First we add the MariaDB repository key:
-
-  ```bash
-  sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
-  ```
-
-  Next we add the repository, followed by a update of apt cache:
-
-  ```bash
-  sudo add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.1/ubuntu xenial main'
-  sudo apt-get update -y
-  ```
-
-  When the repository is updated we install MariaDB and rsync. This is done using the noninteractive option to avoid being prompted for input during the installation. This will cause mariadb to be setup without a password for the root user. This is beneficial for the rest of the setup process (especially when scripting) but obviously bad from a security standpoint. Therefor it is advised to set a password using the following commands:
-
-  ```bash
-  mysql -u root;
-  UPDATE mysql.user SET password = PASSWORD('new_password') WHERE user = 'root';
-  ```
-
-  Note that we are not doing this now, but would otherwise do so. Now, onwards with the installation.
-
-  ```
-  sudo DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server rsync -y;
-  ```
-
   
 
-  ### On MariaDB Galeracluster db1 do the following:
+  5. **Automation with scripts**: Automate all the setup tasks above (1 to 4) using bash shell scripts, and name the script files as: <span style="color: blue">vm_setup.sh</span>, <span style="color: blue">lb_setup.sh</span>, <span style="color: blue">web_setup.sh</span>, <span style="color: blue">hadb_setup.sh</span> respectively. Create one more script file, <span style="color: blue">cloud_setup_all.sh</span> which runs all the scripts and do all the tasks automatically by running this script. Only bash, python and OpenStack API commands are allowed in the scripts. All the shell scripts should be fully parameterized to avoid any hard coding of parameter values inside the scripts so that it can be used in any other projects just by modifying the relevant parameters in a parameter file and/or passing command-line parameters, but without modifying the script. Use a single parameter file, <span style="color: blue">datsXX-params.sh</span> to have most of the common
+     parameters for all the scripts. Describe each script file briefly in the report about its usage and what it does.
 
-  Instead of editing the config file found at /etc/mysql/my.cnf , we create a new configuration file. 
+     Script files should be **well documented with appropriate comments.**
 
-  ```bash
-  sudo nano /etc/mysql/conf.d/galera.cnf
-  ```
 
-  Next we append the following lines to the file:
 
-  ```bash
-  [mysqld]
-  binlog_format=ROW
-  default-storage-engine=innodb
-  innodb_autoinc_lock_mode=2
-  bind-address=0.0.0.0
-  
-  # Galera Provider Configuration
-  wsrep_on=ON
-  wsrep_provider=/usr/lib/galera/libgalera_smm.so
-  
-  # Galera Cluster Configuration
-  wsrep_cluster_name="galera_cluster"
-  wsrep_cluster_address="gcomm://db1,db2,db3"
-  
-  # Galera Synchronization Configuration
-  wsrep_sst_method=rsync
-  
-  # Galera Node Configuration
-  wsrep_node_address="db1"
-  wsrep_node_name="db1"
-  ```
+#### Step by step explanation about the web deployment:
 
-  ### Next we do the same operation on db2 and db3:
+For the deployment part off the assignement we decided to make a automatic deployment using **crontab** and **GIT** that we found verry usefull when testing the "students-grades.php" script. 
 
-  In this step we run the exact same command on both servers, the only difference is in the last two lines of the config file:
 
-  db2:
 
-  ```bash
-  # Galera Node Configuration
-  wsrep_node_address="db2"
-  wsrep_node_name="db2"
-  ```
+Make a public git repository (can be done with a secret repo but we decided to make it public for ease of access)
 
-  db3:
 
-  ```bash
-  # Galera Node Configuration
-  wsrep_node_address="db3"
-  wsrep_node_name="db3"
-  ```
 
-  Screenshots of the resulting config files on all dbservers. Note that we are not making changes to the my.cnf template file, as this is not a good aproach for production. Instead we are creating new config files at /etc/mysql/conf.d/galera.cnf. 
+**Limitations and thoughts:**
 
-  db1:
+We are aware that this solution have limitations but in a real developer environment we would use tools to automate the continues delivery pipeline. Originally we where going to use web hooks but made a decision to not and use crontab to auto pull from our Github repo on a set interval (3 minuets). This setup have more limitations that is linked to Git.
 
-  ![1557478803256](img/1557478803256.png)
 
-  db2:
 
-  ![1557478899956](img/1557478899956.png)
+**Initial clone from GitHub:**
 
-  db3:
+clone down the gitrepo from your preferd service on the "master webserver"
 
-  ![1557479065009](img/1557479065009.png)
+$GITPHPDEPLOYMENT = git repo clone link;
 
-  ### Next - starting the Galera cluster:
+`git clone $GITPHPDEPLOYMENT /var/www/html;`
 
-  We run this command on all nodes:
 
-  ```bash
-  sudo systemctl stop mysql
-  ```
 
-  On the first node (db1), we start the cluster using the following command:
+**Create script that pushes and pulls the code from GitHub:**
 
-  ```bash
-  sudo galera_new_cluster
-  ```
+```bash
+webs=""
 
-  Next we check if the cluster is running using the following command:
+git pull
 
-  ```bash
-  mysql -u root -p -e "show status like 'wsrep_cluster_size'"
-  ```
+for web in $webs; 
 
-  This produces the following output:
+do
 
-  ![1557146368097](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557146368097.png)
+rsync -chavz --delete --exclude ".*" -e "ssh -i ~/.ssh/KEY.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" /var/www/html ubuntu@$web:/var/www/
 
-  After verifying that the result is as expected, we run the following command on BOTH db2 and db3:
+done
+```
 
-  ```bash
-  sudo systemctl start mysql
-  ```
 
-  Then we do another check for cluster size, this time we expect size = 3 (this command can be run on any of the db servers):
-
-  ```bash
-  mysql -u root -p -e "show status like 'wsrep_cluster_size'"
-  ```
-
-  This produces the following output:
-
-  ![1557146683128](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557146683128.png)
-
-  As evident by the screenshot, all nodes are part of the cluster. 
-
-  Next we create the testdatabase as specified. We are using a script to accomplish this. To avoid unnecessary clutter, this script is not shown here. But it is provided with the other script files if you wish to inspect it. To deploy via the script we run the following command:
-
-  ```bash
-  mysql -u root < database-init-script.txt;
-  ```
-
-  Then we create a user for web server access and grant the necessary permissions:
-
-  ```bash
-  mysql -u root
-  create user 'dats06'@'%' identified by '$thrown similar river';
-  grant select on mysql.user to 'dats06'@'%';
-  grant select on student_grades.* to 'dats06'@'%';
-  ```
-
-  Now that the Galera cluster is configured, we move on to setting up MaxScale.
-
-  First we set up a user that MaxScale can use to connect to the cluster. We only need to run these commands on db1, as they are replicated to all servers by galera:
-
-  ```bash
-  mysql -u root;
-  ```
-
-  ```mysql
-  create user 'maxScaleUsr'@'maxscale' identified by 'thrown similar river';
-  grant select on mysql.user to 'maxScaleUsr'@'maxscale';
-  grant select on mysql.db to 'maxScaleUsr'@'maxscale';
-  grant select on mysql.tables_priv to 'maxScaleUsr'@'maxscale';
-  grant show databases on *.* to 'maxScaleUsr'@'maxscale';
-  ```
-
-  
-
-  ### On the MaxScale dbProxy instance, run the following commands:
-
-  Install maxscale:
-
-  ```bash
-  sudo apt-get -y install maxscale
-  ```
-
-  For sanity testing later, we will also install the mariaDB client:
-
-  ```bash
-  apt-get -y install mariadb-client
-  ```
-
-  Next we need to configure the MaxScale config file located at */etc/maxscale.cnf*.  This is a bare minimum of what we need, but it is sufficient for this application:
-
-  ```bash
-  # Globals
-  [maxscale]
-  threads=4
-   
-  # Servers
-  [server1]
-  type=server
-  address=db1
-  port=3306
-  protocol=MySQLBackend
-   
-  [server2]
-  type=server
-  address=db2
-  port=3306
-  protocol=MySQLBackend
-   
-  [server3]
-  type=server
-  address=db3
-  port=3306
-  protocol=MySQLBackend
-   
-  # Monitoring for the servers
-  [Galera Monitor]
-  type=monitor
-  module=galeramon
-  servers=server1,server2,server3
-  user=maxScaleUsr
-  passwd=thrown similar river
-  monitor_interval=1000
-   
-  # Galera router service
-  [Galera Service]
-  type=service
-  router=readwritesplit
-  servers=server1,server2,server3
-  user=maxScaleUsr
-  passwd=thrown similar river
-   
-  # MaxAdmin Service
-  [MaxAdmin Service]
-  type=service
-  router=cli
-   
-  # Galera cluster listener
-  [Galera Listener]
-  type=listener
-  service=Galera Service
-  protocol=MySQLClient
-  # This needs to be here for ipv6 bug in maxscale
-  address=0.0.0.0
-  port=3306
-   
-  # MaxAdmin listener
-  [MaxAdmin Listener]
-  type=listener
-  service=MaxAdmin Service
-  protocol=maxscaled
-  # This needs to be here for ipv6 bug in maxscale
-  address=0.0.0.0
-  socket=default
-  ```
-
-  Screenshot of the resulting config file on the maxscale dbproxy server:
-
-  ![1557479318498](img/1557479318498.png)
-
-  ![1557479370221](img/1557479370221.png)
-
-  To avoid being asked for a password when starting the maxscale service, we need to add the user ubuntu to the maxscale group:
-
-  ```bash
-  sudo adduser ubuntu maxscale
-  ```
-
-  We start the maxscale service:
-
-  ```bash
-  sudo systemctl start maxscale.service
-  ```
-
-  Then we confirm everything running as expected:
-
-  ![1557222569790](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557222569790.png)
-
-  To check change of  master role, we disable server 1 by running the following command on db1:
-
-  ```bash
-  sudo systemctl stop mysql
-  ```
-
-  Next we run the following command on dbproxy and observe the result:
-
-  ```bash
-  maxadmin list servers
-  ```
-
-  ![1557222686770](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557222686770.png)
-
-  
-
-  
-
-  
-
-  
-
-5. **Automation with scripts**: Automate all the setup tasks above (1 to 4) using bash shell scripts, and name the script files as: <span style="color: blue">vm_setup.sh</span>, <span style="color: blue">lb_setup.sh</span>, <span style="color: blue">web_setup.sh</span>, <span style="color: blue">hadb_setup.sh</span> respectively. Create one more script file, <span style="color: blue">cloud_setup_all.sh</span> which runs all the scripts and do all the tasks automatically by running this script. Only bash, python and OpenStack API commands are allowed in the scripts. All the shell scripts should be fully parameterized to avoid any hard coding of parameter values inside the scripts so that it can be used in any other projects just by modifying the relevant parameters in a parameter file and/or passing command-line parameters, but without modifying the script. Use a single parameter file, <span style="color: blue">datsXX-params.sh</span> to have most of the common
-   parameters for all the scripts. Describe each script file briefly in the report about its usage and what it does.
-
-   Script files should be **well documented with appropriate comments.**
-
-   **Decisions:** Explanation for the various decisions we have made throughout the project
+
+
+
+This scripts pulls down the latest version of the git repo from ur preferd service, then itterate over X numbers of web servers and pushes the newly updated gitrepo folder from the master web server. This is done by using rsync and is done for every webserver except the master web server its excecuted on.
+
+
+
+**Nginx config setup:**
+
+Since we use nginx for the web server we need to edit the config to display a new site if added.
+
+Got to: `/etc/nginx/sites-available/default`
+
+
+
+Add your new website:
+
+```bash
+root /var/www/html;
+
+index index.php "add your script"."the extention of choise" test.php index.html students-grades.php index.htm index.nginx-debian.html;
+```
+
+We made this parameterized and adds all files to the parameter file insted off hard coding it like here.
+
+
+
+**Make crontab exceute every X minuets:**
+
+```bash
+*/3 * * * * /bin/sh /home/ubuntu/"git pull script / rsync push script"
+```
+
+The crontab script over tells the vm to excecute the script  /home/ubntu/"name" every 3 minuets.
+
+So in short every 3 minuets we pull down the latest version from the git repo and pushes it out to the "slave" web servers.
+
+
+
+**Decisions:** Explanation for the various decisions we have made throughout the project
 
 - When making these scripts we assumed that the load balancer VM is already present and at a base ubuntu 16.04 setup with no added software. When the load balancer is revert to base Ubuntu the hostname is reset to dats06 and we then change it to lb.
 
@@ -471,11 +258,424 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
 
 - Security group: We, for this assignment, have only made a single security group, however we see that there is a possibility to have a second security group since the load balancer, for example, does not need any access to MySQL or the galera cluster. We think this will 
 
+
+
+## Manual Setup:
+
+## Webserver setup manual
+
+
+
+Basic websetup that installs dependencies, configure Nginx and setting up rsync with crontab deployment.
+
+
+
+##### Install dependencies and file permissions:
+
+First we install all the dependencies needed to setup the web server.
+
+```bash
+sudo apt-get update -y;
+
+sudo apt-get upgrade -y;
+
+sudo apt-get install nginx -y;
+
+sudo systemctl start nginx.service;
+
+sudo adduser ubuntu www-data;
+
+sudo chown -R www-data:www-data /var/www;
+
+sudo chmod -R g+rw /var/www;
+
+sudo apt-get install php-fpm -y;
+
+sudo apt-get install php-mysql -y
+```
+
+
+
+##### Setup Nginx:
+
+To setup the Nginx config we overwrite the /etc/nginx/sites-availabel/default with the use off 
+
+`sudo bash -C "echo ''"`
+
+
+
+```bash
+sudo bash -C "echo 'server {
+
+listen 80 default_server;
+
+listen [::]:80 default_server;
+
+root /var/www/html;
+
+index "ADD SITES" index.html index.htm index.nginx-debian.html;
+
+server_name "Web server name";
+
+location / {
+
+    try_files $uri  $uri/ =404;
+
+}
+
+location ~ \.php$ {
+
+    include snippets/fastcgi-php.conf;
+
+   fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+
+}
+
+location ~ /\.ht {
+
+    deny all;
+
+	}
+}' > /etc/nginx/sites-available/default"
+```
+
+
+
+
+
+Note: after setting the Nginx config you have to restart Nginx.service
+
+```bash
+sudo systemctl restart nginx.service;
+```
+
+
+
+##### Setup rsync script 
+
+```bash
+rsyncScript=('#!/bin/bash
+webs=""
+for web in $webs; do
+    rsync -chavz --delete --exclude ".*" -e "ssh -i ~/.ssh/KEY.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" /var/www/html ubuntu@$web:/var/www/
+done
+')
+```
+
+We chose to make a rsyncScript file because in the automation script we implemented a automatic file sync from GitHub and it was more structured and was easier to edit this way.
+
+
+
+```bash
+(crontab -l ; echo \"*/3 * * * * /bin/sh /home/ubuntu/rsyncScript.sh\") | crontab -;
+```
+
+
+
+**Adding websites**
+
+To add websites you add the `"name"."extetion"` to `/var/www/html` and add it to sites in the nginx config.
+
+## **Steps to do a manual configuration of the DBs:**
+
+### On all db servers run the following sequence of commands:
+
+First we add the MariaDB repository key:
+
+```bash
+sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8
+```
+
+Next we add the repository, followed by a update of apt cache:
+
+```bash
+sudo add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.1/ubuntu xenial main'
+sudo apt-get update -y
+```
+
+When the repository is updated we install MariaDB and rsync. This is done using the noninteractive option to avoid being prompted for input during the installation. This will cause mariadb to be setup without a password for the root user. This is beneficial for the rest of the setup process (especially when scripting) but obviously bad from a security standpoint. Therefor it is advised to set a password using the following commands:
+
+```bash
+mysql -u root;
+UPDATE mysql.user SET password = PASSWORD('new_password') WHERE user = 'root';
+```
+
+Note that we are not doing this now, but would otherwise do so. Now, onwards with the installation.
+
+```
+sudo DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server rsync -y;
+```
+
+
+
+### On MariaDB Galeracluster db1 do the following:
+
+Instead of editing the config file found at /etc/mysql/my.cnf , we create a new configuration file. 
+
+```bash
+sudo nano /etc/mysql/conf.d/galera.cnf
+```
+
+Next we append the following lines to the file:
+
+```bash
+[mysqld]
+binlog_format=ROW
+default-storage-engine=innodb
+innodb_autoinc_lock_mode=2
+bind-address=0.0.0.0
+
+# Galera Provider Configuration
+wsrep_on=ON
+wsrep_provider=/usr/lib/galera/libgalera_smm.so
+
+# Galera Cluster Configuration
+wsrep_cluster_name="galera_cluster"
+wsrep_cluster_address="gcomm://db1,db2,db3"
+
+# Galera Synchronization Configuration
+wsrep_sst_method=rsync
+
+# Galera Node Configuration
+wsrep_node_address="db1"
+wsrep_node_name="db1"
+```
+
+### Next we do the same operation on db2 and db3:
+
+In this step we run the exact same command on both servers, the only difference is in the last two lines of the config file:
+
+db2:
+
+```bash
+# Galera Node Configuration
+wsrep_node_address="db2"
+wsrep_node_name="db2"
+```
+
+db3:
+
+```bash
+# Galera Node Configuration
+wsrep_node_address="db3"
+wsrep_node_name="db3"
+```
+
+Screenshots of the resulting config files on all dbservers. Note that we are not making changes to the my.cnf template file, as this is not a good aproach for production. Instead we are creating new config files at /etc/mysql/conf.d/galera.cnf. 
+
+db1:
+
+![1557478803256](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557478803256.png)
+
+db2:
+
+![1557478899956](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557478899956.png)
+
+db3:
+
+![1557479065009](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557479065009.png)
+
+### Next - starting the Galera cluster:
+
+We run this command on all nodes:
+
+```bash
+sudo systemctl stop mysql
+```
+
+On the first node (db1), we start the cluster using the following command:
+
+```bash
+sudo galera_new_cluster
+```
+
+Next we check if the cluster is running using the following command:
+
+```bash
+mysql -u root -p -e "show status like 'wsrep_cluster_size'"
+```
+
+This produces the following output:
+
+![1557146368097](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557146368097.png)
+
+After verifying that the result is as expected, we run the following command on BOTH db2 and db3:
+
+```bash
+sudo systemctl start mysql
+```
+
+Then we do another check for cluster size, this time we expect size = 3 (this command can be run on any of the db servers):
+
+```bash
+mysql -u root -p -e "show status like 'wsrep_cluster_size'"
+```
+
+This produces the following output:
+
+![1557146683128](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557146683128.png)
+
+As evident by the screenshot, all nodes are part of the cluster. 
+
+Next we create the testdatabase as specified. We are using a script to accomplish this. To avoid unnecessary clutter, this script is not shown here. But it is provided with the other script files if you wish to inspect it. To deploy via the script we run the following command:
+
+```bash
+mysql -u root < database-init-script.txt;
+```
+
+Then we create a user for web server access and grant the necessary permissions:
+
+```bash
+mysql -u root
+create user 'dats06'@'%' identified by '$thrown similar river';
+grant select on mysql.user to 'dats06'@'%';
+grant select on student_grades.* to 'dats06'@'%';
+```
+
+Now that the Galera cluster is configured, we move on to setting up MaxScale.
+
+First we set up a user that MaxScale can use to connect to the cluster. We only need to run these commands on db1, as they are replicated to all servers by galera:
+
+```bash
+mysql -u root;
+```
+
+```mysql
+create user 'maxScaleUsr'@'maxscale' identified by 'thrown similar river';
+grant select on mysql.user to 'maxScaleUsr'@'maxscale';
+grant select on mysql.db to 'maxScaleUsr'@'maxscale';
+grant select on mysql.tables_priv to 'maxScaleUsr'@'maxscale';
+grant show databases on *.* to 'maxScaleUsr'@'maxscale';
+```
+
+
+
+### On the MaxScale dbProxy instance, run the following commands:
+
+Install maxscale:
+
+```bash
+sudo apt-get -y install maxscale
+```
+
+For sanity testing later, we will also install the mariaDB client:
+
+```bash
+apt-get -y install mariadb-client
+```
+
+Next we need to configure the MaxScale config file located at */etc/maxscale.cnf*.  This is a bare minimum of what we need, but it is sufficient for this application:
+
+```bash
+# Globals
+[maxscale]
+threads=4
+ 
+# Servers
+[server1]
+type=server
+address=db1
+port=3306
+protocol=MySQLBackend
+ 
+[server2]
+type=server
+address=db2
+port=3306
+protocol=MySQLBackend
+ 
+[server3]
+type=server
+address=db3
+port=3306
+protocol=MySQLBackend
+ 
+# Monitoring for the servers
+[Galera Monitor]
+type=monitor
+module=galeramon
+servers=server1,server2,server3
+user=maxScaleUsr
+passwd=thrown similar river
+monitor_interval=1000
+ 
+# Galera router service
+[Galera Service]
+type=service
+router=readwritesplit
+servers=server1,server2,server3
+user=maxScaleUsr
+passwd=thrown similar river
+ 
+# MaxAdmin Service
+[MaxAdmin Service]
+type=service
+router=cli
+ 
+# Galera cluster listener
+[Galera Listener]
+type=listener
+service=Galera Service
+protocol=MySQLClient
+# This needs to be here for ipv6 bug in maxscale
+address=0.0.0.0
+port=3306
+ 
+# MaxAdmin listener
+[MaxAdmin Listener]
+type=listener
+service=MaxAdmin Service
+protocol=maxscaled
+# This needs to be here for ipv6 bug in maxscale
+address=0.0.0.0
+socket=default
+```
+
+Screenshot of the resulting config file on the maxscale dbproxy server:
+
+![1557479318498](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557479318498.png)
+
+![1557479370221](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557479370221.png)
+
+To avoid being asked for a password when starting the maxscale service, we need to add the user ubuntu to the maxscale group:
+
+```bash
+sudo adduser ubuntu maxscale
+```
+
+We start the maxscale service:
+
+```bash
+sudo systemctl start maxscale.service
+```
+
+Then we confirm everything running as expected:
+
+![1557222569790](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557222569790.png)
+
+To check change of  master role, we disable server 1 by running the following command on db1:
+
+```bash
+sudo systemctl stop mysql
+```
+
+Next we run the following command on dbproxy and observe the result:
+
+```bash
+maxadmin list servers
+```
+
+![1557222686770](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557222686770.png)
+
+
+
+
+
 6. **Group work details**: Provide following details on your group work.
 
 How you worked as a team [How often did you meet, how tasks were distributed among your group members, whether you managed to make everyone participate and known about all the tasks (not just what s/he did), etc.].
 
-- We have been working very well as a team, we have met almost every day the last 2 weeks of the assignment to work on it. In the beginning we assigned tasks to each member, on "part" to each one: Michael(VM-setup) Ole-Martin(LB-setup), Jakob(Web-setup) and Fredrik(Database-setup). We all know what everyone is doing because we help each other. The group has worked together in a good way which has contributed to
+- We have been working very well as a team, we have met almost every day the last 2 weeks of the assignment to work on it. In the beginning we assigned tasks to each member, one "part" to each one: Michael(VM-setup) Ole-Martin(LB-setup), Jakob(Web-setup) and Fredrik(Database-setup). We all know what everyone is doing because we help each other. The group has worked together in a good way which has contributed to
 
 State who did what in terms of concrete tasks and contribution of the individual members in percentage (not for individual tasks, but as a whole project) using the one who contributed the most as a reference (i.e., 100%).
 
