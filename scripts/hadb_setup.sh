@@ -18,22 +18,12 @@ for vm in ${dbServers[@]}; do
     fi
 done
 
-# Generating hostname array for databases
-webServers=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}' | grep $webServerName`)
-webNames=()
-for vm in ${webServers[@]}; do
-    webNames+=(`echo $vm | sed -E s/$webServerName-/$webServerHostName/g`)
-done
-
 # Generating host configstring for galeraserver
 echo "Generating galera configstring"
 galerahoststring=$( echo ${dbNames[*]} | tr " " ",")
 
-
 ############### SETUP COMMANDS TO BE RUN ON DB SERVERS###############
-
 dbSetupCommands=("
-sudo locale-gen nb_NO.UTF-8
 sudo apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8;
 sudo add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mariadb/repo/10.1/ubuntu xenial main';
 sudo apt-get update -y;
