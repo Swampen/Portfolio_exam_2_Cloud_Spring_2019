@@ -35,7 +35,7 @@ The whole work is divided into different tasks listed below, which include <span
    - [x] A screenshot of the list of VMs created.
    - [x] A screenshot of the host names defined in /etc/hosts of one of the servers (say, datsXX-lb). Give short hostnames to the servers here, such as lb, web1, web2, web3, db1, db2, db3, and
      maxscale and use names in all the configurations instead of hard coded IPs.
-   - [ ] A table listing the VMs with these information: VM name, hostname, IP, flavor, software you
+   - [x] A table listing the VMs with these information: VM name, hostname, IP, flavor, software you
      installed in the VM, and ports used for specific purpose(s).
 
 2. **HAProxy setup**: Setup HAProxy for the load balancer and monitoring. Load balancer should use round robin algorithm with equal weights. HAProxy monitoring page should be configured such that it can be accessed from the url, <span href="dats.vlab.cs.hioa.no:8006/stats" style="color: blue">dats.vlab.cs.hioa.no:80XX/stats</span>. Use your ALTO credentials for the authentication purpose.
@@ -77,9 +77,9 @@ The whole work is divided into different tasks listed below, which include <span
 
 6. **Group work details**: Provide following details on your group work.
 
-  - [ ] How you worked as a team [How often did you meet, how tasks were distributed among your group members, whether you managed to make everyone participate and known about all the tasks (not just what s/he did), etc.].
-  - [ ] State who did what in terms of concrete tasks and contribution of the individual members in percentage (not for individual tasks, but as a whole project) using the one who contributed the most as a reference (i.e., 100%).
-  - [ ] Problems or difficulties faced (if any) regarding working in the group.
+  - [x] How you worked as a team [How often did you meet, how tasks were distributed among your group members, whether you managed to make everyone participate and known about all the tasks (not just what s/he did), etc.].
+  - [x] State who did what in terms of concrete tasks and contribution of the individual members in percentage (not for individual tasks, but as a whole project) using the one who contributed the most as a reference (i.e., 100%).
+  - [x] Problems or difficulties faced (if any) regarding working in the group.
 
 7. **Self-evaluation**: Evaluate your own submission by filling up the table below. It has two parts: section-wise expected scores (out of the given full scores in brackets), and comments. Comments should be given point-wise whether you have done what has been asked properly (+), or not done or if any issues/weaknesses (-), and any other comments worth mentioning (*).
 

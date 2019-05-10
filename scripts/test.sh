@@ -63,6 +63,9 @@ parallel-ssh -i -H "${ipList[*]}" \
 	-x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
 	"$script"
 
+# This is to change the hostname of the load balancer.
+# This is because the load balancer was created, it had a different hostname,
+# so when the VM is rebuilt to the default Ubunti16.04 image, it defaults to the old hostname
 ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@$lbIP "sudo sed -i s/.*/$LBHostName/g /etc/hostname"
 
 # Rebooting all the VMs
