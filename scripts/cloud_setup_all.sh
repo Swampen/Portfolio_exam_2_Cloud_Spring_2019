@@ -3,6 +3,11 @@
 echo "IMPORTANT: This script needs to be executed from its own folder"
 echo "IMPORTANT: The the key dats06-key.pem MUST be placed in the folder: ~/.ssh/"
 
+if [[ ! $# = 1 ]]; then
+	echo "ERROR: the file dats06-params.sh should be given as the only parameter to this script"
+	exit 0
+fi
+
 # Getting correct path to script directory
 dir=$(dirname "$0")
 
