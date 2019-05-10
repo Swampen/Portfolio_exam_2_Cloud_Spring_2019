@@ -25,7 +25,7 @@ done
 # Creates the security group if it doesn't exist
 if [[ $SecGrExist = false ]]
 then
-	openstack security group create $securityGroup
+	openstack security group create $securityGroup -f json
 fi
 
 # sleeps for a little while so that the script will register that the SecGroup has been made
@@ -38,48 +38,75 @@ openstack security group rule create \
 	--protocol tcp \
 	--dst-port 22 \
 	--description "Allows ssh inside the cloud" \
-	--remote-group $securityGroup $securityGroup
+	--remote-group $securityGroup $securityGroup -f json
 
 # Permits ssh from the outside
 openstack security group rule create \
        	--protocol tcp \
        	--remote-ip 0.0.0.0/0 \
 	--description "Allows ssh from outside systems into the cloud" \
-	--dst-port 22 $securityGroup
+	--dst-port 22 $securityGroup -f json
 
 # Permitting HTTP from the outside
 openstack security group rule create \
 	--protocol tcp \
 	--remote-ip 0.0.0.0/0 \
 	--description "Allows HTTP access from the outside" \
-	--dst-port 80 $securityGroup
+	--dst-port 80 $securityGroup -f json
 
 # Permits MySQL client connection
 openstack security group rule create --protocol tcp \
 	--dst-port 3306 \
 	--description "Allows a MySQL client connection" \
-	--remote-group $securityGroup $securityGroup
+	--remote-group $securityGroup $securityGroup -f json
 
 # Permits State Snapshot Transfer (SST)
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows State Snapshot Transfer" \
 	--dst-port 4444 \
-	--remote-group $securityGroup $securityGroup
+	--remote-group $securityGroup $securityGroup -f json
 
 # Permits Galera cluster replication traffic
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows Galera cluster replication traffic" \
 	--dst-port 4567 \
-	--remote-group $securityGroup $securityGroup
+	--remote-group $securityGroup $securityGroup -f json
 
 # Permits Incremental State Transfer (IST)
 openstack security group rule create \
 	--protocol tcp \
 	--description "Allows Incremental State Transfer" \
 	--dst-port 4568 \
-	--remote-group $securityGroup $securityGroup
+	--remote-group $securityGroup $securityGroup -f json
+
+
+exists=`openstack server list --status ACTIVE -c Name | awk '!/^$|Name/ {print $2;}'`
+
+for vm in $exists; do
+  if [[ $vm =~ ($webServerName-)([1-9]) ]]
+  then
+    echo "$vm already exists"
+    WebOK=true
+  fi
+
+  # If i corresponds with the database proxy name
+  # delete said server, if i does not match then set corresponding boolean to true
+  if [[ $vm = "$DBProxyName" ]]
+  then
+    echo "$vm already exists"
+    DBPOK=true
+  fi
+
+  # If i corresponds with the database name with a - and a number at the end
+  # delete said server, if i does not match then set corresponding boolean to true
+  if [[ $vm =~ ($DBName-)([1-9]) ]]
+  then
+    echo "$vm already exists"
+    DBOK=true
+  fi
+done
 
 # While loop which checks if the web servers, databases and database proxy are up and running correctly
 while [[ $WebOK = false ]] || [[ $DBPOK = false ]] || [[ $DBOK = false ]]
@@ -94,7 +121,7 @@ do
 			--security-group $securityGroup \
 			--key-name $keyPairName \
 			--nic net-id=BSc_dats_network\
-       			--min 1 --max $numberOfWebServers --wait $webServerName
+       			--min 1 --max $numberOfWebServers --wait $webServerName -f json
 	fi
 
 	# If the database proxy isn't up and running make it
@@ -107,7 +134,7 @@ do
 			--security-group $securityGroup \
 			--key-name $keyPairName \
 			--nic net-id=BSc_dats_network \
-			--min 1 --max 1 --wait $DBProxyName
+			--min 1 --max 1 --wait $DBProxyName -f json
 	fi
 
 	# If the databases aren't up and running make them
@@ -120,7 +147,7 @@ do
 			--security-group $securityGroup \
 			--key-name $keyPairName \
 			--nic net-id=BSc_dats_network \
-			--min 1 --max $numberOfDBs --wait $DBName
+			--min 1 --max $numberOfDBs --wait $DBName -f json
 	fi
 
 	# Puts the name of all the servers which failed to start in an array
@@ -174,7 +201,8 @@ do
 
 done
 echo "Setup complete!"
-echo "Updating VMs"
+
+echo "Getting all the VM IPs"
 # Optains the name of all the VMs
 vmnames=(`openstack server list -c Name | awk '!/^$|Name/ {print $2;}'`)
 names=()
@@ -207,7 +235,7 @@ for vm in ${vmnames[@]}; do
 	hostsfileEntry="$ip $name $name2 \\n$hostsfileEntry"
 done
 
-
+echo "Updating and upgrading the VMs (this may take some time, go grab a coffee in the meantime)"
 # Updates and upgrades the VMs using a parallel ssh
 update=("
 sudo apt-get update -y;
@@ -237,8 +265,10 @@ parallel-ssh -i -H "${ipList[*]}" \
 	-x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
 	"$script"
 
-ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@$lbIP \
-"sudo sed -i 's/.*/$LBHostName/g' /etc/hostname"
+# This is to change the hostname of the load balancer.
+# This is because the load balancer was created, it had a different hostname,
+# so when the VM is rebuilt to the default Ubunti16.04 image, it defaults to the old hostname
+ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@$lbIP "sudo sed -i s/.*/$LBHostName/g /etc/hostname"
 
 # Rebooting all the VMs
 echo "Rebooting the VMs"
