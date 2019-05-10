@@ -110,8 +110,6 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
 
   ![60335152_831048893929922_5148209643666800640_n](img/60335152_831048893929922_5148209643666800640_n.png)
 
-  ![59916466_439028726665418_8136470639218262016_n](img/59916466_439028726665418_8136470639218262016_n.png)
-
   
 
 4. **HA database setup**: Setup a cluster-based high availability database with <span style="color: red">Galera cluster</span> of three MariaDB database servers (nodes) and a <span style="color: red">MaxScale</span> database proxy. Create a database named ‘<span style="color: blue">student_grades</span>‘ with two tables as in the lecture slide and add some test data. Create a <span style="color: blue">students-grades.php</span> page that lists the grades of the students on the web, <span href="dats.vlab.cs.hioa.no:8006/students-grades.php" style="color: blue">dats.vlab.cs.hioa.no:80XX/students-grades.php</span>. For those who do not know much PHP, the example PHP code given in the lecture slide can be used. This web page should also show the host name or IP of the web server serving the page, at the bottom. Use the **same user name and password as your ALTO** to access the database from the PHP code.
@@ -162,7 +160,7 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
 
 #### Step by step explanation about the web deployment:
 
-For the deployment part off the assignement we decided to make a automatic deployment using **crontab** and **GIT** that we found verry usefull when testing the "students-grades.php" script. 
+For the deployment part off the assignment we decided to make a automatic deployment using **crontab** and **GIT** that we found very useful when testing the "students-grades.php" script. 
 
 
 
@@ -206,7 +204,7 @@ done
 
 
 
-This scripts pulls down the latest version of the git repo from ur preferd service, then itterate over X numbers of web servers and pushes the newly updated gitrepo folder from the master web server. This is done by using rsync and is done for every webserver except the master web server its excecuted on.
+This scripts pulls down the latest version of the git repo from our preferred service, then iterate over X numbers of web servers and pushes the newly updated Git repo folder from the master web server. This is done by using rsync and is done for every webserver except the master web server its executed on.
 
 
 
@@ -230,15 +228,15 @@ We made this parameterized and adds all files to the parameter file insted off h
 
 
 
-**Make crontab exceute every X minuets:**
+**Make crontab execute every X minutes:**
 
 ```bash
 */3 * * * * /bin/sh /home/ubuntu/"git pull script / rsync push script"
 ```
 
-The crontab script over tells the vm to excecute the script  /home/ubntu/"name" every 3 minuets.
+The crontab script over tells the vm to execute the script  /home/ubuntu/"name" every 3 minuets.
 
-So in short every 3 minuets we pull down the latest version from the git repo and pushes it out to the "slave" web servers.
+So in short every 3 minutes we pull down the latest version from the git repo and pushes it out to the "slave" web servers.
 
 
 
@@ -408,7 +406,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server rsync -y;
 
 
 
-### On MariaDB Galeracluster db1 do the following:
+### On MariaDB Galera cluster db1 do the following:
 
 Instead of editing the config file found at /etc/mysql/my.cnf , we create a new configuration file. 
 
@@ -461,7 +459,7 @@ wsrep_node_address="db3"
 wsrep_node_name="db3"
 ```
 
-Screenshots of the resulting config files on all dbservers. Note that we are not making changes to the my.cnf template file, as this is not a good aproach for production. Instead we are creating new config files at /etc/mysql/conf.d/galera.cnf. 
+Screenshots of the resulting config files on all db servers. Note that we are not making changes to the my.cnf template file, as this is not a good approach for production. Instead we are creating new config files at /etc/mysql/conf.d/galera.cnf. 
 
 db1:
 
@@ -517,7 +515,7 @@ This produces the following output:
 
 As evident by the screenshot, all nodes are part of the cluster. 
 
-Next we create the testdatabase as specified. We are using a script to accomplish this. To avoid unnecessary clutter, this script is not shown here. But it is provided with the other script files if you wish to inspect it. To deploy via the script we run the following command:
+Next we create the test database as specified. We are using a script to accomplish this. To avoid unnecessary clutter, this script is not shown here. But it is provided with the other script files if you wish to inspect it. To deploy via the script we run the following command:
 
 ```bash
 mysql -u root < database-init-script.txt;
