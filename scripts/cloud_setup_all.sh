@@ -28,3 +28,5 @@ echo "DEPLOYING WEBSERVERS"
 # Running script for configuring database proxy and db servers
 echo "DEPLOYING DATABASES"
 "$dir"/hadb_setup.sh
+
+echo "SETUP COMPLETE"

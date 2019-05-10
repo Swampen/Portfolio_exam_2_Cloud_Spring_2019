@@ -240,15 +240,15 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
 
   db1:
 
-  ![1557478803256](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557478803256.png)
+  ![1557478803256](img/1557478803256.png)
 
   db2:
 
-  ![1557478899956](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557478899956.png)
+  ![1557478899956](img/1557478899956.png)
 
   db3:
 
-  ![1557479065009](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557479065009.png)
+  ![1557479065009](img/1557479065009.png)
 
   ### Next - starting the Galera cluster:
 
@@ -408,9 +408,9 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
 
   Screenshot of the resulting config file on the maxscale dbproxy server:
 
-  ![1557479318498](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557479318498.png)
+  ![1557479318498](img/1557479318498.png)
 
-  ![1557479370221](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557479370221.png)
+  ![1557479370221](img/1557479370221.png)
 
   To avoid being asked for a password when starting the maxscale service, we need to add the user ubuntu to the maxscale group:
 
