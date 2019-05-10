@@ -76,6 +76,20 @@ wsrep_node_address="db3"
 wsrep_node_name="db3"
 ```
 
+Screenshots of the resulting config files on all dbservers. Note that we are not making changes to the my.cnf template file, as this is not a good aproach for production. Instead we are creating new config files at /etc/mysql/conf.d/galera.cnf. 
+
+db1:
+
+![1557478803256](img/1557478803256.png)
+
+db2:
+
+![1557478899956](img/1557478899956.png)
+
+db3:
+
+![1557479065009](img/1557479065009.png)
+
 ### Next - starting the Galera cluster:
 
 We run this command on all nodes:
@@ -216,6 +230,12 @@ protocol=maxscaled
 address=0.0.0.0
 socket=default
 ````
+
+Screenshot of the resulting config file on the maxscale dbproxy server:
+
+![1557479318498](img/1557479318498.png)
+
+![1557479370221](img/1557479370221.png)
 
 To avoid being asked for a password when starting the maxscale service, we need to add the user ubuntu to the maxscale group:
 
