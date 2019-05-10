@@ -144,47 +144,31 @@ Script files should be **well documented with appropriate comments.**
 
 - [ ] State who did what in terms of concrete tasks and contribution of the individual members in percentage (not for individual tasks, but as a whole project) using the one who contributed the most as a reference (i.e., 100%).
 
-  ​	Task 1.
+  |                    | Ole-Martin (s325905) | Michael (s325903) | Jakob(s325908) | Fredrik(s325853) |
+  | ------------------ | -------------------- | ----------------- | -------------- | ---------------- |
+  | Task 1             | x                    | x                 |                |                  |
+  | Task 2             | x                    |                   |                |                  |
+  | Task 3             | x                    |                   | x              |                  |
+  | Task 4             |                      |                   |                | x                |
+  | vm_setup.sh        | x                    | x                 |                |                  |
+  | lb_setup.sh        | x                    |                   |                |                  |
+  | web_setup.sh       | x                    |                   | x              |                  |
+  | hadb_setup.sh      | x                    |                   |                | x                |
+  | cloud_setup_all.sh | x                    | x                 | x              | x                |
+  | Task 6.            |                      | x                 |                |                  |
+  | Task 7.            |                      | x                 |                |                  |
 
-  ​		Vm setup: Michael
+  Due to the lb_setup.sh script being very small and easy to setup, Ole-Martin helped out the other scripts in addition to doing it.
 
-  ​		Hostfile setup: Ole-Martin
+  Work percentage:
 
-  ​	Task 2.
+  Ole-Martin: 100%
 
-  ​		Ole-Martin
+  Michael: 85%
 
-  ​	Task 3. 
+  Jakob: 85%
 
-  ​		Jakob and Ole-Martin
-
-  ​	Task 4. 
-
-  ​		Fredrik
-
-  ​	Task 5.
-
-  ​		vm_setup:
-
-  ​			vm-part: Michael
-
-  ​			hostfile-part: Ole-Martin
-
-  ​		lb_setup:
-
-  ​			Ole-Martin
-
-  ​		web_setup:
-
-  ​			Jakob
-
-  ​			Ole-Martin
-
-  ​		hadb_setup:
-
-  ​			Fredrik
-
-  ​			Ole-Martin
+  Fredrik: 85%
 
 - [ ] Problems or difficulties faced (if any) regarding working in the group.
 
@@ -192,7 +176,19 @@ Script files should be **well documented with appropriate comments.**
 
 7. **Self-evaluation**: Evaluate your own submission by filling up the table below. It has two parts: section-wise expected scores (out of the given full scores in brackets), and comments. Comments should be given point-wise whether you have done what has been asked properly (+), or not done or if any issues/weaknesses (-), and any other comments worth mentioning (*).
 
+   | Tasks (points possible)     | Expected points | Comments                          |
+   | --------------------------- | --------------- | --------------------------------- |
+   | VM-setup (25)               | 25              | (+) The VM setup went very smooth |
+   | HAProxy setup (10)          | 10              | (+) The HAProxy setup went smooth |
+   | Web server setup (15)       | 15              |                                   |
+   | HA DB setup (17)            | 17              |                                   |
+   | Automation with scripts(25) | 25              |                                   |
+   | Group work details (3)      | 3               |                                   |
+   | Self-Evaluation (2)         | 2               |                                   |
+   | Report quality(3)           | 3               |                                   |
+   | Total score(100)            |                 |                                   |
 
+   
 
 
 
