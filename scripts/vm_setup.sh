@@ -168,7 +168,7 @@ do
 	for i in $failed
 	do
 
-		# If i corresponds with the web server name with a - and a number at the end
+		# If it corresponds with the web server name with a - and a number at the end
 		# delete said server, if i does not match then set corresponding boolean to true
 		if [[ $i =~ ($webServerName-)([1-9]) ]]
 		then
@@ -178,7 +178,7 @@ do
 			WebOK=true
 		fi
 
-		# If i corresponds with the database proxy name
+		# If it corresponds with the database proxy name
 		# delete said server, if i does not match then set corresponding boolean to true
 		if [[ $i = "$DBProxyName" ]]
 		then
@@ -188,7 +188,7 @@ do
 			DBPOK=true
 		fi
 
-		# If i corresponds with the database name with a - and a number at the end
+		# If it corresponds with the database name with a - and a number at the end
 		# delete said server, if i does not match then set corresponding boolean to true
 		if [[ $i =~ ($DBName-)([1-9]) ]]
 		then
