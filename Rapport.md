@@ -28,7 +28,7 @@ The whole work is divided into different tasks listed below, which include <span
 - An architecture diagram of your cloud setup, where all the VMs are labeled with VM names,
   and IPs.
 
-
+  ![architectureDiagram](img/architectureDiagram.png)
 
 - Screenshots from ALTO showing created ssh key, security group and security group rules. Label security group rules indicating purpose of the rules.
 
@@ -99,10 +99,18 @@ A screenshot of the list of VMs created.
 - Provide a screenshot of Nginx configuration you updated to enable PHP support in one of
   the web servers (say, datsXX-web-1).
 
+  ![60136381_322085561799785_1075912414572052480_n](img/60136381_322085561799785_1075912414572052480_n.png)
+
 Setup a simple <span style="color: red">web deployment</span> mechanism, where datsXX-web-1 is considered as the primary web server and whenever an updated web application is deployed to this server, the application is synchronized (<span style="color: red">pushed</span>) to the other web servers automatically in every <span style="color: red">3 minutes</span> (using rsync and crontab).
 
 - Provide a screenshot of the crontab showing the rsync commands used for synchronizing
   the web servers.
+
+  ![60297683_305385530355746_6695621931611193344_n](img/60297683_305385530355746_6695621931611193344_n.png)
+
+  ![60335152_831048893929922_5148209643666800640_n](img/60335152_831048893929922_5148209643666800640_n.png)
+
+  ![59916466_439028726665418_8136470639218262016_n](img/59916466_439028726665418_8136470639218262016_n.png)
 
   
 
@@ -110,9 +118,14 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
 
 - Provide screenshots of the configurations (only for the changes you made) of the 3 database
   servers in the Galera cluster and the MaxScale proxy server.
+
+  
+
 - Provide a screenshot confirming Galera cluster size to 3.
+
 - Show the list of servers from the command *maxadmin list servers* in MaxScale
   confirming that the Galera cluster is working as expected.
+
 - Also, provide a screenshot of the list of servers showing successful change of master role
   when the current master database is stopped
 
