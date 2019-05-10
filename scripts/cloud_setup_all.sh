@@ -1,5 +1,8 @@
 #! /bin/bash
 
+echo "IMPORTANT: This script needs to be executed from its own folder"
+echo "IMPORTANT: The the key dats06-key.pem MUST be placed in the folder: ~/.ssh/"
+
 # Getting correct path to script directory
 dir=$(dirname "$0")
 
