@@ -226,7 +226,7 @@ for vm in ${vmnames[@]}; do
         	name2=`echo $name | sed -E s/$webServerName-/$webServerHostName/g`
 	elif [[ $name = $LBName ]]; then
         	name2=`echo $name | sed s/$LBName/$LBHostName/g`
-					lbIP="$ip"
+			lbIP="$ip"
 	else
         	echo not found
 	fi
@@ -246,6 +246,11 @@ parallel-ssh -t 600 -i -H "${ipList[*]}" \
 	 -x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
 	"$update"
 
+# This is to change the hostname of the load balancer.
+# This is because the load balancer was created, it had a different hostname,
+# so when the VM is rebuilt to the default Ubunti16.04 image, it defaults to the old hostname
+ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@$lbIP "sudo sed -i s/.*/$LBHostName/g /etc/hostname"
+
 # The commands that will execute over paralell ssh
 # Will do an entry in the hosts file with the required hosts
 # Change locale to what's specified in the parameter file
@@ -264,11 +269,6 @@ parallel-ssh -i -H "${ipList[*]}" \
 	-l $username \
 	-x "-i '$sshKeyLocation' -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand='$sshProxyCommand'" \
 	"$script"
-
-# This is to change the hostname of the load balancer.
-# This is because the load balancer was created, it had a different hostname,
-# so when the VM is rebuilt to the default Ubunti16.04 image, it defaults to the old hostname
-ssh -i "$sshKeyLocation" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ProxyCommand="$sshProxyCommand" $username@$lbIP "sudo sed -i s/.*/$LBHostName/g /etc/hostname"
 
 # Rebooting all the VMs
 echo "Rebooting the VMs"
