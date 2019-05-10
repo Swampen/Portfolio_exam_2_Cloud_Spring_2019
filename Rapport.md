@@ -455,6 +455,90 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
 
    Script files should be **well documented with appropriate comments.**
 
+   
+
+   #### Step by step explanation about the web deployment:
+
+   For the deployment part off the assignement we decided to make a automatic deployment using **crontab** and **GIT** that we found verry usefull when testing the "students-grades.php" script. 
+
+   
+
+   Make a public git repository (can be done with a secret repo but we decided to make it public for ease of access)
+
+   
+
+   **Limitations and thoughts:**
+
+   We are aware that this solution have limitations but in a real developer enviorment we would use tools to automate the continues delivery pipeline. Originaly we where going to use web hooks but made a decision to not and use crontab to auto pull from our github repo on a set interval (3 minuets). This setup have more limitations that is linked to Git.
+
+   
+
+   **Initial clone from GitHub:**
+
+   clone down the gitrepo from your preferd service on the "master webserver"
+
+   $GITPHPDEPLOYMENT = git repo clone link;
+
+   `git clone $GITPHPDEPLOYMENT /var/www/html;`
+
+   
+
+   **Create script that pushes and pulls the code from GitHub:**
+
+   ```bash
+   webs=""
+   
+   git pull
+   
+   for web in $webs; 
+   
+   do
+   
+   rsync -chavz --delete --exclude ".*" -e "ssh -i ~/.ssh/KEY.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" /var/www/html ubuntu@$web:/var/www/
+   
+   done
+   ```
+
+   
+
+   
+
+   This scripts pulls down the latest version of the git repo from ur preferd service, then itterate over X numbers of web servers and pushes the newly updated gitrepo folder from the master web server. This is done by using rsync and is done for every webserver except the master web server its excecuted on.
+
+   
+
+   **Nginx config setup:**
+
+   Since we use nginx for the web server we need to edit the config to display a new site if added.
+
+   Got to: `/etc/nginx/sites-available/default`
+
+   
+
+   Add your new website:
+
+   ```bash
+   root /var/www/html;
+   
+   index index.php "add your script"."the extention of choise" test.php index.html students-grades.php index.htm index.nginx-debian.html;
+   ```
+
+   We made this parameterized and adds all files to the parameter file insted off hard coding it like here.
+
+   
+
+   **Make crontab exceute every X minuets:**
+
+   ```bash
+   */3 * * * * /bin/sh /home/ubuntu/"git pull script / rsync push script"
+   ```
+
+   The crontab script over tells the vm to excecute the script  /home/ubntu/"name" every 3 minuets.
+
+   So in short every 3 minuets we pull down the latest version from the git repo and pushes it out to the "slave" web servers.
+
+   
+
    **Decisions:** Explanation for the various decisions we have made throughout the project
 
 - When making these scripts we assumed that the load balancer VM is already present and at a base ubuntu 16.04 setup with no added software. When the load balancer is revert to base Ubuntu the hostname is reset to dats06 and we then change it to lb.
