@@ -21,14 +21,16 @@ Follow the naming conventions for the virtual machines (VMs) as shown in the fig
 • Server-side programming: PHP v7.x
 • Database proxy: MariaDB MaxScale 2.2
 
-The whole work is divided into different tasks listed below, which include <span style="color: red">implementing in ALTO cloud</span> and <span style="color: red">providing etails as asked in the submitted report</span>. The report should provide properly labelled or captioned <span style="color: red">diagrams</span>, <span style="color: red">configuration details</span> and <span style="color: red">screenshots</span> as asked in these tasks.
+The whole work is divided into different tasks listed below, which include <span style="color: red">implementing in ALTO cloud</span> and <span style="color: red">providing etails as asked in the submitted report</span>. The report should provide properly labelled or captioned <span style="color: red">diagrams</span>, <span style="color: red">configuration details</span> and <span style="color: red">screenshots</span> as asked in these tasks.<div style="page-break-after: always;"></div>
+
+
 
 1. **VM setup**: This task consists of creating a ssh key (datsXX-key) and a security group (datsXXsecurity), creating VMs with desired flavors, doing minimal required common configurations in VMs such as **naming of hosts**, and setup **locale to Norwegian**. From the security point of view, only the required outside access (such as ssh, web, etc.) to the VMs must be given. This means the required ports only should be opened in the security group. The report should provide the followings:
 
 - An architecture diagram of your cloud setup, where all the VMs are labeled with VM names,
   and IPs.
 
-  ![architectureDiagram](img/architectureDiagram.png)
+  ![architectureDiagram](img/architectureDiagram.png)<div style="page-break-after: always;"></div>
 
 - Screenshots from ALTO showing created ssh key, security group and security group rules. Label security group rules indicating purpose of the rules.
 
@@ -43,7 +45,7 @@ Rules of dats06-security:
 
 Keypairs:
 
-![1557133197127](img/1557133197127.png)
+![1557133197127](img/1557133197127.png)<div style="page-break-after: always;"></div>
 
 A screenshot of the list of VMs created.
 
@@ -55,7 +57,7 @@ A screenshot of the list of VMs created.
   
   Load balancer's hosts file:
 
-![1557481673114](img/1557481673114.png)
+![1557481673114](img/1557481673114.png)<div style="page-break-after: always;"></div>
 
 - A table listing the VMs with these information: VM name, hostname, IP, flavor, software you
   installed in the VM, and ports used for specific purpose(s).
@@ -69,9 +71,9 @@ A screenshot of the list of VMs created.
 | dats06-db-1    | db1      | 10.10.7.147 | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
 | dats06-db-2    | db2      | 10.10.7.149 | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
 | dats06-db-3    | db3      | 10.10.7.148 | m1.512MB4GB | MariaDB 10.1                                                 | 22, 3306, 4444, 4567, 4568 |
-| dats06-dbproxy | dbproxy  | 10.10.7.145 | m1.512MB4GB | MaxScale                                                     | 22, 3306                   |
+| dats06-dbproxy | dbproxy  | 10.10.7.145 | m1.512MB4GB | MaxScale                                                     | 22, 3306, 4444, 4567, 4568 |
 
-
+<div style="page-break-after: always;"></div>
 
 2. **HAProxy setup**: Setup HAProxy for the load balancer and monitoring. Load balancer should use round robin algorithm with equal weights. HAProxy monitoring page should be configured such that it can be accessed from the url, <span href="dats.vlab.cs.hioa.no:8006/stats" style="color: blue">dats.vlab.cs.hioa.no:80XX/stats</span>. Use your ALTO credentials for the authentication purpose.
 
@@ -81,7 +83,7 @@ A screenshot of the list of VMs created.
 
 ![1557134437526](img/1557134437526.png)
 
-![1557134478098](img/1557134478098.png)
+![1557489309815](img/1557489309815.png)<div style="page-break-after: always;"></div>
 
 - Provide screenshot of the resulting monitoring web page.
 
@@ -90,7 +92,7 @@ A screenshot of the list of VMs created.
 
 - Show screenshots of the test results confirming working load balancer by curling a web page <span style="color: blue">testlb.php</span> in a loop from a local computer (e.g., your laptop), which shows alternately changing the web server IP. 
 
-![1557147286058](img/1557147286058.png)
+![1557147286058](img/1557147286058.png)<div style="page-break-after: always;"></div>
 
 
 
@@ -108,26 +110,28 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
 
   ![60297683_305385530355746_6695621931611193344_n](img/60297683_305385530355746_6695621931611193344_n.png)
 
-  ![60335152_831048893929922_5148209643666800640_n](img/60335152_831048893929922_5148209643666800640_n.png)
+  ![60335152_831048893929922_5148209643666800640_n](img/60335152_831048893929922_5148209643666800640_n.png)<div style="page-break-after: always;"></div>
 
   
 
 4. **HA database setup**: Setup a cluster-based high availability database with <span style="color: red">Galera cluster</span> of three MariaDB database servers (nodes) and a <span style="color: red">MaxScale</span> database proxy. Create a database named ‘<span style="color: blue">student_grades</span>‘ with two tables as in the lecture slide and add some test data. Create a <span style="color: blue">students-grades.php</span> page that lists the grades of the students on the web, <span href="dats.vlab.cs.hioa.no:8006/students-grades.php" style="color: blue">dats.vlab.cs.hioa.no:80XX/students-grades.php</span>. For those who do not know much PHP, the example PHP code given in the lecture slide can be used. This web page should also show the host name or IP of the web server serving the page, at the bottom. Use the **same user name and password as your ALTO** to access the database from the PHP code.
+
+   **NB**: We had some issues adding the repository for MariaDB 10.2 and have then decided to use 10.1
 
 - Provide screenshots of the configurations (only for the changes you made) of the 3 database
   servers in the Galera cluster and the MaxScale proxy server.
 
   db1:
 
-  ![1557478803256](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557478803256.png)
+  ![1557478803256](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\C%5CUsers%5CMiMoT%5CDocuments%5CGitHub%5CPortfolio_exam_2_Cloud%5Cimg%5C1557478803256.png)<div style="page-break-after: always;"></div>
 
   db2:
 
-  ![1557478899956](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557478899956.png)
+  ![1557478899956](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\C%5CUsers%5CMiMoT%5CDocuments%5CGitHub%5CPortfolio_exam_2_Cloud%5Cimg%5C1557478899956.png)<div style="page-break-after: always;"></div>
 
   db3:
 
-  ![1557479065009](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557479065009.png)
+  ![1557479065009](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\C%5CUsers%5CMiMoT%5CDocuments%5CGitHub%5CPortfolio_exam_2_Cloud%5Cimg%5C1557479065009.png)<div style="page-break-after: always;"></div>
 
   MaxScale:
 
@@ -137,7 +141,7 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
 
 - Provide a screenshot confirming Galera cluster size to 3.
 
-  ![1557146683128](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557146683128.png)
+  ![1557146683128](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\C%5CUsers%5CMiMoT%5CDocuments%5CGitHub%5CPortfolio_exam_2_Cloud%5Cimg%5C1557146683128.png)<div style="page-break-after: always;"></div>
 
 - Show the list of servers from the command *maxadmin list servers* in MaxScale
   confirming that the Galera cluster is working as expected.
@@ -147,7 +151,7 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
 - Also, provide a screenshot of the list of servers showing successful change of master role
   when the current master database is stopped
 
-  ![1557151047477](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\1557151047477.png)
+  ![1557151047477](C:\Users\MiMoT\Documents\GitHub\Portfolio_exam_2_Cloud\img\C%5CUsers%5CMiMoT%5CDocuments%5CGitHub%5CPortfolio_exam_2_Cloud%5Cimg%5C1557151047477.png)<div style="page-break-after: always;"></div>
 
   
 
@@ -155,6 +159,10 @@ Setup a simple <span style="color: red">web deployment</span> mechanism, where d
      parameters for all the scripts. Describe each script file briefly in the report about its usage and what it does.
 
      Script files should be **well documented with appropriate comments.**
+
+     NB: Run the main script from the scripts directory, we have also made a instanceRubuildUbunutu16_04.sh to revert all VMs back to base Ubuntu 16.04 state to preserve IP on the ALTO cloud.
+
+     NB: Make sure to have parallel-ssh installed (pssh)
 
 
 
@@ -182,6 +190,8 @@ $GITPHPDEPLOYMENT = git repo clone link;
 
 `git clone $GITPHPDEPLOYMENT /var/www/html;`
 
+<div style="page-break-after: always;"></div>
+
 
 
 **Create script that pushes and pulls the code from GitHub:**
@@ -206,7 +216,7 @@ done
 
 This scripts pulls down the latest version of the git repo from our preferred service, then iterate over X numbers of web servers and pushes the newly updated Git repo folder from the master web server. This is done by using rsync and is done for every webserver except the master web server its executed on.
 
-
+<div style="page-break-after: always;"></div>
 
 **Nginx config setup:**
 
@@ -266,7 +276,7 @@ So in short every 3 minutes we pull down the latest version from the git repo an
 
 Basic websetup that installs dependencies, configure Nginx and setting up rsync with crontab deployment.
 
-
+<div style="page-break-after: always;"></div>
 
 ##### Install dependencies and file permissions:
 
@@ -292,7 +302,7 @@ sudo apt-get install php-fpm -y;
 sudo apt-get install php-mysql -y
 ```
 
-
+<div style="page-break-after: always;"></div>
 
 ##### Setup Nginx:
 
@@ -347,7 +357,7 @@ Note: after setting the Nginx config you have to restart Nginx.service
 sudo systemctl restart nginx.service;
 ```
 
-
+<div style="page-break-after: always;"></div>
 
 ##### Setup rsync script 
 
@@ -397,6 +407,8 @@ When the repository is updated we install MariaDB and rsync. This is done using 
 mysql -u root;
 UPDATE mysql.user SET password = PASSWORD('new_password') WHERE user = 'root';
 ```
+
+<div style="page-break-after: always;"></div>
 
 Note that we are not doing this now, but would otherwise do so. Now, onwards with the installation.
 
@@ -451,6 +463,8 @@ wsrep_node_address="db2"
 wsrep_node_name="db2"
 ```
 
+<div style="page-break-after: always;"></div>
+
 db3:
 
 ```bash
@@ -465,9 +479,13 @@ db1:
 
 ![1557478803256](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557478803256.png)
 
+<div style="page-break-after: always;"></div>
+
 db2:
 
 ![1557478899956](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557478899956.png)
+
+<div style="page-break-after: always;"></div>
 
 db3:
 
@@ -508,6 +526,8 @@ Then we do another check for cluster size, this time we expect size = 3 (this co
 ```bash
 mysql -u root -p -e "show status like 'wsrep_cluster_size'"
 ```
+
+<div style="page-break-after: always;"></div>
 
 This produces the following output:
 
@@ -647,6 +667,8 @@ We start the maxscale service:
 sudo systemctl start maxscale.service
 ```
 
+<div style="page-break-after: always;"></div>
+
 Then we confirm everything running as expected:
 
 ![1557222569790](C:/Users/MiMoT/Documents/GitHub/Portfolio_exam_2_Cloud/img/1557222569790.png)
@@ -674,6 +696,8 @@ maxadmin list servers
 How you worked as a team [How often did you meet, how tasks were distributed among your group members, whether you managed to make everyone participate and known about all the tasks (not just what s/he did), etc.].
 
 - We have been working very well as a team, we have met almost every day the last 2 weeks of the assignment to work on it. In the beginning we assigned tasks to each member, one "part" to each one of us: Michael(VM-setup) Ole-Martin(LB-setup), Jakob(Web-setup) and Fredrik(Database-setup). We all know what everyone is doing because we help each other. The group has worked together in a good way which has contributed to
+
+<div style="page-break-after: always;"></div>
 
 State who did what in terms of concrete tasks and contribution of the individual members in percentage (not for individual tasks, but as a whole project) using the one who contributed the most as a reference (i.e., 100%).
 
@@ -708,6 +732,8 @@ State who did what in terms of concrete tasks and contribution of the individual
 ​	Problems or difficulties faced (if any) regarding working in the group.
 
 - We have had prior experience working as a group, so the first thing we did when we started working on the assignment was to distribute the tasks among us and create a git repo. Due to all of this we have had very few issues working together as a group
+
+<div style="page-break-after: always;"></div>
 
 7. **Self-evaluation**: Evaluate your own submission by filling up the table below. It has two parts: section-wise expected scores (out of the given full scores in brackets), and comments. Comments should be given point-wise whether you have done what has been asked properly (+), or not done or if any issues/weaknesses (-), and any other comments worth mentioning (*).
 
