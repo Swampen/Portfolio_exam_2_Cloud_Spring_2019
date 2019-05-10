@@ -15,7 +15,14 @@ sudo add-apt-repository 'deb [arch=amd64,i386,ppc64el] http://ftp.utexas.edu/mar
 sudo apt-get update -y
 ```
 
-When the repository is updated we install MariaDB and rsync. This is done 
+When the repository is updated we install MariaDB and rsync. This is done using the noninteractive option to avoid being prompted for input during the installation. This will cause mariadb to be setup without a password for the root user. This is beneficial for the rest of the setup process (especially when scripting) but obviously bad from a security standpoint. Therefor it is advised to set a password using the following commands:
+
+```bash
+mysql -u root;
+UPDATE mysql.user SET password = PASSWORD('new_password') WHERE user = 'root';
+```
+
+Note that we are not doing this now, but would otherwise do so. Now, onwards with the installation.
 
 ```
 sudo DEBIAN_FRONTEND=noninteractive apt-get install mariadb-server rsync -y;
@@ -120,7 +127,7 @@ After verifying that the result is as expected, we run the following command on 
 sudo systemctl start mysql
 ```
 
-Then we do another check for cluster size, this time we expect size = 3 (this command con be run on any of the db servers):
+Then we do another check for cluster size, this time we expect size = 3 (this command can be run on any of the db servers):
 
 ```bash
 mysql -u root -p -e "show status like 'wsrep_cluster_size'"
@@ -132,6 +139,21 @@ This produces the following output:
 
 As evident by the screenshot, all nodes are part of the cluster. 
 
+Next we create the testdatabase as specified. We are using a script to accomplish this. To avoid unnecessary clutter, this script is not shown here. But it is provided with the other script files if you wish to inspect it. To deploy via the script we run the following command:
+
+```bash
+mysql -u root < database-init-script.txt;
+```
+
+Then we create a user for web server access and grant the necessary permissions:
+
+```bash
+mysql -u root
+create user 'dats06'@'%' identified by '$thrown similar river';
+grant select on mysql.user to 'dats06'@'%';
+grant select on student_grades.* to 'dats06'@'%';
+```
+
 Now that the Galera cluster is configured, we move on to setting up MaxScale.
 
 First we set up a user that MaxScale can use to connect to the cluster. We only need to run these commands on db1, as they are replicated to all servers by galera:
@@ -141,11 +163,11 @@ mysql -u root;
 ```
 
 ```mysql
-create user 'ubuntu'@'maxscale' identified by 'mypwd';
-grant select on mysql.user to 'ubuntu'@'maxscale';
-grant select on mysql.db to 'ubuntu'@'maxscale';
-grant select on mysql.tables_priv to 'ubuntu'@'maxscale';
-grant show databases on *.* to 'ubuntu'@'maxscale';
+create user 'maxScaleUsr'@'maxscale' identified by 'thrown similar river';
+grant select on mysql.user to 'maxScaleUsr'@'maxscale';
+grant select on mysql.db to 'maxScaleUsr'@'maxscale';
+grant select on mysql.tables_priv to 'maxScaleUsr'@'maxscale';
+grant show databases on *.* to 'maxScaleUsr'@'maxscale';
 ```
 
 
@@ -195,8 +217,8 @@ protocol=MySQLBackend
 type=monitor
 module=galeramon
 servers=server1,server2,server3
-user=ubuntu
-passwd=mypwd
+user=maxScaleUsr
+passwd=thrown similar river
 monitor_interval=1000
  
 # Galera router service
@@ -204,8 +226,8 @@ monitor_interval=1000
 type=service
 router=readwritesplit
 servers=server1,server2,server3
-user=ubuntu
-passwd=mypwd
+user=maxScaleUsr
+passwd=thrown similar river
  
 # MaxAdmin Service
 [MaxAdmin Service]
