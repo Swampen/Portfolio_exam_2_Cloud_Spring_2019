@@ -1,6 +1,7 @@
 #! /bin/bash
 
 echo "IMPORTANT: This script needs to be executed from its own folder"
+echo "IMPORTANT parallel ssh must be installed for this script to run correctly. Install with sudo apt-get -y install pssh"
 
 if [[ ! $# = 1 ]]; then
 	echo "ERROR: the file dats06-params.sh should be given as the only parameter to this script"
