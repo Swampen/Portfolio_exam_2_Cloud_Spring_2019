@@ -29,7 +29,7 @@ The whole work is divided into different tasks listed below, which include <span
 
 1. **VM setup**: This task consists of creating a ssh key (datsXX-key) and a security group (datsXXsecurity), creating VMs with desired flavors, doing minimal required common configurations in VMs such as **naming of hosts**, and setup **locale to Norwegian**. From the security point of view, only the required outside access (such as ssh, web, etc.) to the VMs must be given. This means the required ports only should be opened in the security group. The report should provide the followings:
 
-   - [ ] An architecture diagram of your cloud setup, where all the VMs are labeled with VM names,
+   - [x] An architecture diagram of your cloud setup, where all the VMs are labeled with VM names,
      and IPs.
    - [x] Screenshots from ALTO showing created ssh key, security group and security group rules. Label security group rules indicating purpose of the rules.
    - [x] A screenshot of the list of VMs created.
@@ -50,24 +50,24 @@ The whole work is divided into different tasks listed below, which include <span
 
 3. **Web server setup**: Setup all the web servers using <span style="color: red">Nginx</span> with the support for dynamic web development with PHP and MariaDB and give a proper ownership and permission to the web root folder for the ‘ubuntu’ user.
 
-   1. [ ] Provide a screenshot of Nginx configuration you updated to enable PHP support in one of
-      the web servers (say, datsXX-web-1).
+   - [x]  Provide a screenshot of Nginx configuration you updated to enable PHP support in one of
+     the web servers (say, datsXX-web-1).
 
    Setup a simple <span style="color: red">web deployment</span> mechanism, where datsXX-web-1 is considered as the primary web server and whenever an updated web application is deployed to this server, the application is synchronized (<span style="color: red">pushed</span>) to the other web servers automatically in every <span style="color: red">3 minutes</span> (using rsync and crontab).
 
-   - [ ] Provide a screenshot of the crontab showing the rsync commands used for synchronizing
+   - [x] Provide a screenshot of the crontab showing the rsync commands used for synchronizing
      the web servers.
 
      
 
 4. **HA database setup**: Setup a cluster-based high availability database with <span style="color: red">Galera cluster</span> of three MariaDB database servers (nodes) and a <span style="color: red">MaxScale</span> database proxy. Create a database named ‘<span style="color: blue">student_grades</span>‘ with two tables as in the lecture slide and add some test data. Create a <span style="color: blue">students-grades.php</span> page that lists the grades of the students on the web, <span href="dats.vlab.cs.hioa.no:8006/students-grades.php" style="color: blue">dats.vlab.cs.hioa.no:80XX/students-grades.php</span>. For those who do not know much PHP, the example PHP code given in the lecture slide can be used. This web page should also show the host name or IP of the web server serving the page, at the bottom. Use the **same user name and password as your ALTO** to access the database from the PHP code.
 
-   - [ ] Provide screenshots of the configurations (only for the changes you made) of the 3 database
+   - [x] Provide screenshots of the configurations (only for the changes you made) of the 3 database
      servers in the Galera cluster and the MaxScale proxy server.
-   - [ ] Provide a screenshot confirming Galera cluster size to 3.
-   - [ ] Show the list of servers from the command *maxadmin list servers* in MaxScale
+   - [x] Provide a screenshot confirming Galera cluster size to 3.
+   - [x] Show the list of servers from the command *maxadmin list servers* in MaxScale
      confirming that the Galera cluster is working as expected.
-   - [ ] Also, provide a screenshot of the list of servers showing successful change of master role
+   - [x] Also, provide a screenshot of the list of servers showing successful change of master role
      when the current master database is stopped
 
 5. **Automation with scripts**: Automate all the setup tasks above (1 to 4) using bash shell scripts, and name the script files as: <span style="color: blue">vm_setup.sh</span>, <span style="color: blue">lb_setup.sh</span>, <span style="color: blue">web_setup.sh</span>, <span style="color: blue">hadb_setup.sh</span> respectively. Create one more script file, <span style="color: blue">cloud_setup_all.sh</span> which runs all the scripts and do all the tasks automatically by running this script. Only bash, python and OpenStack API commands are allowed in the scripts. All the shell scripts should be fully parameterized to avoid any hard coding of parameter values inside the scripts so that it can be used in any other projects just by modifying the relevant parameters in a parameter file and/or passing command-line parameters, but without modifying the script. Use a single parameter file, <span style="color: blue">datsXX-params.sh</span> to have most of the common
