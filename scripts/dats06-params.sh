@@ -24,15 +24,15 @@ export ipSubnet="10\.10"
 ################# VM setup paremeters #################
 # ssh parameters
 # This is the name to be used for creation of the keypair used for authentication
-export keyPairName="dats06-key"
+export keyPairName="key"
 # This is the loctation for the private-key to be used for accessing the vm
 export sshKeyLocation=~/.ssh/$keyPairName.pem
 # Usename for logging into vms
 export username="ubuntu"
 # Name of master host
-export masterHost="dats.vlab.cs.hioa.no"
+export masterHost="master.host"
 # Name of user on master host
-export masterUser="dats06"
+export masterUser="uname"
 # Proxycommand for ssh into vms
 export sshProxyCommand="ssh -i \"$sshKeyLocation\" -q -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR $masterUser@$masterHost -W %h:%p"
 # Locale parameter
@@ -43,16 +43,16 @@ export timezone="Europe/Oslo"
 export keyboard="no"
 
 ################# Load Balancer Parameters #################
-export LBSTATUSER="dats06"
-export LBSTATPASSWD="thrown similar river"
+export LBSTATUSER="uname"
+export LBSTATPASSWD="pwd"
 
 ################# Web Setup Parameters ######################
 export GITPHPDEPLOYMENT="https://github.com/JakobSimonsen/Portfolio_exam_deployment.git"
 export CUSTOMAVAILABLESITES="index.php test.php students-grades.php"
 
 ################# Databace Setup Parameters ######################
-export maxscalePass="thrown similar river"
-export maxscaleUser="maxScaleUsr"
-export webServerUser="dats06"
-export webServerPass="thrown similar river"
+export maxscalePass="pwd"
+export maxscaleUser="mxuname"
+export webServerUser="uname"
+export webServerPass="pwd"
 export dbSetupScript="database-init-script.txt"
